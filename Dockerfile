@@ -11,9 +11,16 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+# Sesbírat statické soubory při buildu (bez potřeby DB nebo Redis).
+# Všechny nastavení mají výchozí hodnoty, takže spuštění funguje i bez env proměnných.
+RUN python manage.py collectstatic --no-input
+
+# Neprivilegovaný uživatel pro runtime
+RUN useradd -u 1000 -r django && \
+    chmod +x entrypoint.sh
 
 EXPOSE 8000
 
-ENTRYPOINT ["/entrypoint.sh"]
+USER django
+
+ENTRYPOINT ["./entrypoint.sh"]

@@ -1,0 +1,46 @@
+name: Build & Push Docker image
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  REGISTRY: harbor.servisovadlo.eu
+  IMAGE: harbor.servisovadlo.eu/apps/mezikkozy
+
+jobs:
+  build:
+    name: Build and push
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Log in to Harbor
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.HARBOR_USERNAME }}
+          password: ${{ secrets.HARBOR_PASSWORD }}
+
+      - name: Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE }}
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=sha,prefix=sha-,format=short
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=registry,ref=${{ env.IMAGE }}:latest
+          cache-to: type=inline

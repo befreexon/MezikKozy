@@ -1,0 +1,11 @@
+.git
+.github
+.env
+staticfiles/
+__pycache__/
+**/*.pyc
+**/*.pyo
+.vscode/
+.idea/
+infrastructure/
+*.sqlite3
