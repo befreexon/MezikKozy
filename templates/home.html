@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mezi Kostkami – Lobby{% endblock %}
+
+{% block content %}
+<div class="container">
+  <header class="page-header">
+    <h1>Mezi Kostkami</h1>
+    <p>Kasino hra štěstí a odvahy</p>
+  </header>
+
+  <div class="home-grid">
+
+    <!-- Create room -->
+    <section class="card">
+      <h2 class="card-title">Vytvořit místnost</h2>
+      <form method="post" action="{% url 'game:create_room' %}">
+        {% csrf_token %}
+        <div class="form-group">
+          <label for="room-name">Název místnosti</label>
+          <input type="text" id="room-name" name="name" placeholder="Místnost {{ user.username }}" maxlength="100">
+        </div>
+        <button type="submit" class="action-btn primary">Vytvořit místnost</button>
+      </form>
+    </section>
+
+    <!-- Open rooms -->
+    <section class="card">
+      <h2 class="card-title">Otevřené místnosti</h2>
+      {% if rooms %}
+        <div class="room-list">
+          {% for room in rooms %}
+            <div class="room-item">
+              <div class="room-info">
+                <span class="room-name">{{ room.name }}</span>
+                <span class="room-host">Hostitel: {{ room.host.username }}</span>
+              </div>
+              <div class="room-meta">
+                <span class="room-status room-status--{{ room.status }}">
+                  {% if room.status == 'waiting' %}Čeká{% else %}Hraje{% endif %}
+                </span>
+                <span class="room-players">{{ room.active_player_count }}/{{ room.max_players }} hráčů</span>
+                {% if room.status == 'waiting' %}
+                  <a href="{% url 'game:join_room' room.id %}" class="action-btn primary action-btn--small">Připojit</a>
+                {% else %}
+                  <span class="room-closed">Probíhá</span>
+                {% endif %}
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="empty-state">Žádné otevřené místnosti. Vytvořte novou!</p>
+      {% endif %}
+    </section>
+
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ room.name }} – Hrát{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/game.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<!-- Game Over Modal -->
+<div class="modal-overlay hidden" id="gameover-screen">
+  <div class="modal">
+    <h2 id="winner-title">🏆 Vítěz!</h2>
+    <p id="winner-text"></p>
+    <a href="{% url 'game:home' %}" class="action-btn primary" style="text-decoration:none;display:block;text-align:center;">
+      Zpět do lobby
+    </a>
+  </div>
+</div>
+
+<div class="container">
+  <header>
+    <h1>Mezi Kostkami</h1>
+    <p id="connection-status" class="connection-status">Připojování…</p>
+  </header>
+
+  <!-- Players bar -->
+  <div class="players-bar" id="players-bar"></div>
+
+  <!-- Game table -->
+  <div class="game-table">
+    <div class="dice-section">
+
+      <div class="dice-row" id="first-dice-row">
+        <div class="die-wrapper">
+          <div class="die empty" id="d1">?</div>
+          <div class="die-label">Nejnižší</div>
+        </div>
+        <div class="dice-separator">–</div>
+        <div class="die-wrapper">
+          <div class="die empty" id="d2">?</div>
+          <div class="die-label">Střední</div>
+        </div>
+        <div class="dice-separator">–</div>
+        <div class="die-wrapper">
+          <div class="die empty" id="d3">?</div>
+          <div class="die-label">Nejvyšší</div>
+        </div>
+      </div>
+
+      <div id="range-display" class="range-indicator hidden">Rozsah: ? – ?</div>
+
+      <div class="die-wrapper" id="bonus-die-wrapper" style="display:none;">
+        <div class="die empty" id="d-bonus">?</div>
+        <div class="die-label">Váš hod</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div class="controls" id="controls">
+    <div class="turn-text" id="turn-text">Načítání…</div>
+    <div class="phase-title" id="phase-title">Připojování k serveru…</div>
+    <div id="control-area"></div>
+  </div>
+
+  <!-- Log -->
+  <div class="log" id="log"></div>
+</div>
+
+<script>
+  const ROOM_ID = {{ room.id }};
+  const CURRENT_USER_ID = {{ current_user_id }};
+</script>
+<script src="{% static 'js/game.js' %}"></script>
+{% endblock %}

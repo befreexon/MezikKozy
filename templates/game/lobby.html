@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ room.name }} – Lobby{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/accounts.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <header class="page-header">
+    <h1>{{ room.name }}</h1>
+    <p>Čekárna · čeká se na hráče</p>
+  </header>
+
+  <div class="lobby-layout">
+
+    <section class="card lobby-card">
+      <div class="lobby-header">
+        <h2 class="card-title">Hráči</h2>
+        <span class="player-count" id="player-count">{{ players.count }}/{{ room.max_players }}</span>
+      </div>
+
+      <div id="player-list">
+        {% for p in players %}
+          <div class="lobby-player">
+            <span class="lobby-player-name">{{ p.user.username }}</span>
+            {% if p.user == room.host %}
+              <span class="host-badge">Hostitel</span>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+
+      <div class="lobby-actions">
+        {% if is_host %}
+          <button id="start-btn" class="action-btn primary" {% if players.count < 2 %}disabled{% endif %}>
+            Zahájit hru
+          </button>
+          <p class="skip-info" id="start-hint">
+            {% if players.count < 2 %}Čeká se na dalšího hráče…{% else %}Připraveni ke hře!{% endif %}
+          </p>
+        {% else %}
+          <p class="waiting-text">Čeká se na hostitele, aby zahájil hru…</p>
+        {% endif %}
+
+        <a href="{% url 'game:home' %}" class="action-btn secondary" style="text-decoration:none;text-align:center;margin-top:10px;">
+          Opustit místnost
+        </a>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2 class="card-title">Odkaz do místnosti</h2>
+      <p style="word-break:break-all;color:var(--cream2);font-size:0.95rem;">
+        {{ request.build_absolute_uri }}
+      </p>
+    </section>
+
+  </div>
+</div>
+
+<script>
+  const ROOM_ID = {{ room.id }};
+  const IS_HOST = {{ is_host|yesno:"true,false" }};
+  const CURRENT_USER_ID = {{ request.user.id }};
+  const ROOM_HOST_ID = {{ room.host_id }};
+</script>
+<script src="{% static 'js/lobby.js' %}"></script>
+{% endblock %}

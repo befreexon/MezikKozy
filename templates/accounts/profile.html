@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Profil {{ profile.user.username }} – Mezi Kostkami{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/accounts.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <header class="page-header">
+    <h1>{{ profile.user.username }}</h1>
+    <p>Hráčský profil</p>
+  </header>
+
+  <div class="profile-grid">
+
+    <section class="card">
+      <h2 class="card-title">Statistiky</h2>
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-value">{{ profile.games_played }}</div>
+          <div class="stat-label">Odehráno her</div>
+        </div>
+        <div class="stat-item stat-item--win">
+          <div class="stat-value">{{ profile.games_won }}</div>
+          <div class="stat-label">Výher</div>
+        </div>
+        <div class="stat-item stat-item--loss">
+          <div class="stat-value">{{ profile.games_lost }}</div>
+          <div class="stat-label">Proher</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">{{ profile.win_rate }}%</div>
+          <div class="stat-label">Úspěšnost</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2 class="card-title">Poslední hry</h2>
+      {% if recent_results %}
+        <div class="results-list">
+          {% for result in recent_results %}
+            <div class="result-item result-item--{% if result.won %}win{% else %}loss{% endif %}">
+              <span class="result-room">{{ result.room.name }}</span>
+              <span class="result-outcome">{% if result.won %}Výhra{% else %}Prohra{% endif %}</span>
+              <span class="result-money">{{ result.final_money }} Kč</span>
+              <span class="result-date">{{ result.played_at|date:"d.m.Y" }}</span>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="empty-state">Zatím žádné odehrané hry.</p>
+      {% endif %}
+    </section>
+
+  </div>
+</div>
+{% endblock %}
