@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mezi kostkami</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
+
+:root {
+–gold: #c9a84c;
+–gold-light: #e8c97a;
+–dark: #0d0a06;
+–dark2: #1a1510;
+–dark3: #241e16;
+–felt: #0a2e1a;
+–felt2: #0d3820;
+–red: #8b1a1a;
+–red-bright: #cc2222;
+–cream: #f0e6c8;
+–cream2: #d4c49a;
+–shadow: rgba(0,0,0,0.8);
+}
+
+- { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+background: var(–dark);
+font-family: ‘Crimson Text’, Georgia, serif;
+color: var(–cream);
+min-height: 100vh;
+overflow-x: hidden;
+position: relative;
+}
+
+body::before {
+content: ‘’;
+position: fixed;
+inset: 0;
+background:
+radial-gradient(ellipse 80% 60% at 50% 0%, rgba(201,168,76,0.08) 0%, transparent 60%),
+radial-gradient(ellipse 60% 40% at 50% 100%, rgba(10,46,26,0.4) 0%, transparent 60%),
+repeating-linear-gradient(45deg, transparent, transparent 40px, rgba(201,168,76,0.015) 40px, rgba(201,168,76,0.015) 41px);
+pointer-events: none;
+z-index: 0;
+}
+
+.container {
+max-width: 900px;
+margin: 0 auto;
+padding: 20px;
+position: relative;
+z-index: 1;
+}
+
+header {
+text-align: center;
+padding: 30px 0 20px;
+border-bottom: 1px solid rgba(201,168,76,0.3);
+margin-bottom: 24px;
+}
+
+header h1 {
+font-family: ‘Playfair Display’, serif;
+font-size: clamp(2.2rem, 6vw, 3.8rem);
+font-weight: 900;
+letter-spacing: 0.06em;
+color: var(–gold);
+text-shadow: 0 0 40px rgba(201,168,76,0.4), 2px 2px 8px rgba(0,0,0,0.8);
+line-height: 1;
+}
+
+header p {
+font-style: italic;
+color: var(–cream2);
+font-size: 1.1rem;
+margin-top: 6px;
+opacity: 0.8;
+}
+
+/* Players bar */
+.players-bar {
+display: grid;
+grid-template-columns: 1fr auto 1fr;
+gap: 12px;
+align-items: center;
+margin-bottom: 20px;
+}
+
+.player-card {
+background: linear-gradient(135deg, var(–dark3), var(–dark2));
+border: 1px solid rgba(201,168,76,0.25);
+border-radius: 8px;
+padding: 14px 18px;
+position: relative;
+transition: border-color 0.3s;
+}
+
+.player-card.active {
+border-color: var(–gold);
+box-shadow: 0 0 20px rgba(201,168,76,0.2), inset 0 0 20px rgba(201,168,76,0.03);
+}
+
+.player-card.eliminated {
+opacity: 0.4;
+filter: grayscale(1);
+}
+
+.player-card h3 {
+font-family: ‘Playfair Display’, serif;
+font-size: 1rem;
+color: var(–gold);
+letter-spacing: 0.08em;
+text-transform: uppercase;
+}
+
+.player-money {
+font-size: 1.6rem;
+font-weight: 600;
+color: var(–cream);
+margin-top: 2px;
+}
+
+.player-money span {
+font-size: 0.85rem;
+color: var(–cream2);
+}
+
+.active-indicator {
+position: absolute;
+top: 8px;
+right: 10px;
+width: 8px;
+height: 8px;
+background: var(–gold);
+border-radius: 50%;
+animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+0%, 100% { opacity: 1; transform: scale(1); }
+50% { opacity: 0.4; transform: scale(0.8); }
+}
+
+.bank-display {
+text-align: center;
+}
+
+.bank-display .label {
+font-size: 0.75rem;
+letter-spacing: 0.15em;
+text-transform: uppercase;
+color: var(–cream2);
+opacity: 0.7;
+}
+
+.bank-amount {
+font-family: ‘Playfair Display’, serif;
+font-size: 1.8rem;
+color: var(–gold);
+font-weight: 700;
+text-shadow: 0 0 20px rgba(201,168,76,0.5);
+}
+
+/* Game table - felt area */
+.game-table {
+background: radial-gradient(ellipse at 50% 30%, var(–felt2), var(–felt) 70%, #061a0e);
+border: 2px solid rgba(201,168,76,0.3);
+border-radius: 16px;
+padding: 28px;
+margin-bottom: 20px;
+box-shadow: inset 0 0 60px rgba(0,0,0,0.5), 0 8px 32px rgba(0,0,0,0.6);
+position: relative;
+overflow: hidden;
+}
+
+.game-table::before {
+content: ‘’;
+position: absolute;
+inset: 8px;
+border: 1px solid rgba(201,168,76,0.12);
+border-radius: 10px;
+pointer-events: none;
+}
+
+/* Dice area */
+.dice-section {
+display: flex;
+flex-direction: column;
+align-items: center;
+gap: 20px;
+}
+
+.dice-row {
+display: flex;
+gap: 20px;
+justify-content: center;
+align-items: center;
+}
+
+.die {
+width: 72px;
+height: 72px;
+background: linear-gradient(145deg, #fafafa, #e8e0d0);
+border-radius: 14px;
+display: flex;
+align-items: center;
+justify-content: center;
+font-family: ‘Playfair Display’, serif;
+font-size: 2rem;
+font-weight: 900;
+color: #1a0a0a;
+box-shadow:
+4px 4px 12px rgba(0,0,0,0.6),
+-1px -1px 4px rgba(255,255,255,0.4),
+inset 1px 1px 3px rgba(255,255,255,0.6);
+transition: transform 0.15s, box-shadow 0.15s;
+position: relative;
+cursor: default;
+user-select: none;
+}
+
+.die.empty {
+background: linear-gradient(145deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+border: 2px dashed rgba(201,168,76,0.2);
+color: rgba(201,168,76,0.2);
+font-size: 1.2rem;
+box-shadow: none;
+}
+
+.die.rolling {
+animation: rollDie 0.5s ease-out;
+}
+
+@keyframes rollDie {
+0% { transform: rotate(0deg) scale(1); }
+25% { transform: rotate(-15deg) scale(1.1); }
+50% { transform: rotate(10deg) scale(0.95); }
+75% { transform: rotate(-5deg) scale(1.05); }
+100% { transform: rotate(0deg) scale(1); }
+}
+
+.die.highlight-min {
+box-shadow: 0 0 0 3px #4488ff, 4px 4px 12px rgba(0,0,0,0.6);
+}
+
+.die.highlight-max {
+box-shadow: 0 0 0 3px #ff4444, 4px 4px 12px rgba(0,0,0,0.6);
+}
+
+.die.highlight-between {
+box-shadow: 0 0 0 3px var(–gold), 0 0 20px rgba(201,168,76,0.5), 4px 4px 12px rgba(0,0,0,0.4);
+animation: winGlow 0.6s ease-out;
+}
+
+.die.highlight-miss {
+box-shadow: 0 0 0 3px var(–red-bright), 4px 4px 12px rgba(0,0,0,0.6);
+}
+
+@keyframes winGlow {
+0% { transform: scale(1); }
+50% { transform: scale(1.15); }
+100% { transform: scale(1); }
+}
+
+.die-label {
+font-size: 0.7rem;
+letter-spacing: 0.12em;
+text-transform: uppercase;
+color: rgba(240,230,200,0.5);
+text-align: center;
+margin-top: 4px;
+}
+
+.die-wrapper {
+display: flex;
+flex-direction: column;
+align-items: center;
+}
+
+.range-indicator {
+font-family: ‘Playfair Display’, serif;
+font-size: 1.1rem;
+color: var(–gold);
+padding: 8px 20px;
+border: 1px solid rgba(201,168,76,0.4);
+border-radius: 20px;
+background: rgba(201,168,76,0.08);
+letter-spacing: 0.05em;
+}
+
+/* Controls */
+.controls {
+background: linear-gradient(135deg, var(–dark3), var(–dark2));
+border: 1px solid rgba(201,168,76,0.2);
+border-radius: 12px;
+padding: 24px;
+margin-bottom: 20px;
+}
+
+.phase-title {
+font-family: ‘Playfair Display’, serif;
+font-size: 1.2rem;
+color: var(–gold);
+text-align: center;
+margin-bottom: 16px;
+letter-spacing: 0.05em;
+}
+
+.bet-row {
+display: flex;
+gap: 10px;
+flex-wrap: wrap;
+justify-content: center;
+margin-bottom: 14px;
+}
+
+.bet-btn {
+background: transparent;
+border: 1px solid rgba(201,168,76,0.4);
+color: var(–cream);
+font-family: ‘Crimson Text’, serif;
+font-size: 1rem;
+padding: 8px 18px;
+border-radius: 6px;
+cursor: pointer;
+transition: all 0.2s;
+letter-spacing: 0.03em;
+}
+
+.bet-btn:hover {
+background: rgba(201,168,76,0.15);
+border-color: var(–gold);
+color: var(–gold);
+}
+
+.bet-btn.selected {
+background: rgba(201,168,76,0.2);
+border-color: var(–gold);
+color: var(–gold-light);
+box-shadow: 0 0 12px rgba(201,168,76,0.2);
+}
+
+.action-btn {
+display: block;
+width: 100%;
+max-width: 320px;
+margin: 0 auto;
+padding: 14px 24px;
+font-family: ‘Playfair Display’, serif;
+font-size: 1.15rem;
+font-weight: 700;
+letter-spacing: 0.08em;
+text-transform: uppercase;
+border: none;
+border-radius: 8px;
+cursor: pointer;
+transition: all 0.2s;
+position: relative;
+overflow: hidden;
+}
+
+.action-btn.primary {
+background: linear-gradient(135deg, #b8860b, var(–gold), #b8860b);
+color: var(–dark);
+box-shadow: 0 4px 20px rgba(201,168,76,0.35);
+}
+
+.action-btn.primary:hover {
+transform: translateY(-2px);
+box-shadow: 0 6px 28px rgba(201,168,76,0.5);
+}
+
+.action-btn.primary:active {
+transform: translateY(0);
+}
+
+.action-btn.secondary {
+background: transparent;
+border: 1px solid rgba(201,168,76,0.4);
+color: var(–cream2);
+}
+
+.action-btn.secondary:hover {
+background: rgba(255,255,255,0.05);
+border-color: var(–cream2);
+color: var(–cream);
+}
+
+.action-btn:disabled {
+opacity: 0.3;
+cursor: not-allowed;
+transform: none !important;
+}
+
+.btn-group {
+display: flex;
+gap: 12px;
+justify-content: center;
+flex-wrap: wrap;
+}
+
+.btn-group .action-btn {
+max-width: 200px;
+}
+
+/* Log */
+.log {
+background: rgba(0,0,0,0.4);
+border: 1px solid rgba(201,168,76,0.15);
+border-radius: 10px;
+padding: 16px;
+max-height: 180px;
+overflow-y: auto;
+font-size: 0.95rem;
+line-height: 1.7;
+}
+
+.log::-webkit-scrollbar { width: 4px; }
+.log::-webkit-scrollbar-track { background: transparent; }
+.log::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.3); border-radius: 2px; }
+
+.log-entry {
+border-bottom: 1px solid rgba(255,255,255,0.05);
+padding: 4px 0;
+animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+from { opacity: 0; transform: translateY(-4px); }
+to { opacity: 1; transform: translateY(0); }
+}
+
+.log-entry.win { color: var(–gold-light); }
+.log-entry.loss { color: #e06060; }
+.log-entry.info { color: var(–cream2); opacity: 0.7; }
+.log-entry.system { color: rgba(201,168,76,0.6); font-style: italic; }
+
+/* Modal overlay */
+.modal-overlay {
+position: fixed;
+inset: 0;
+background: rgba(0,0,0,0.85);
+display: flex;
+align-items: center;
+justify-content: center;
+z-index: 100;
+backdrop-filter: blur(4px);
+}
+
+.modal {
+background: linear-gradient(135deg, var(–dark3) 0%, var(–dark2) 100%);
+border: 1px solid rgba(201,168,76,0.5);
+border-radius: 16px;
+padding: 40px;
+max-width: 440px;
+width: 90%;
+text-align: center;
+box-shadow: 0 20px 80px rgba(0,0,0,0.8), 0 0 60px rgba(201,168,76,0.1);
+}
+
+.modal h2 {
+font-family: ‘Playfair Display’, serif;
+font-size: 2rem;
+color: var(–gold);
+margin-bottom: 12px;
+}
+
+.modal p {
+color: var(–cream2);
+font-size: 1.1rem;
+margin-bottom: 24px;
+line-height: 1.6;
+}
+
+.hidden { display: none; }
+
+/* Setup screen */
+#setup-screen .modal {
+max-width: 500px;
+}
+
+.setup-option {
+margin: 16px 0;
+}
+
+.setup-option label {
+display: block;
+color: var(–cream2);
+font-size: 0.85rem;
+letter-spacing: 0.1em;
+text-transform: uppercase;
+margin-bottom: 6px;
+}
+
+.setup-option input {
+width: 100%;
+background: rgba(255,255,255,0.06);
+border: 1px solid rgba(201,168,76,0.3);
+border-radius: 6px;
+color: var(–cream);
+font-family: ‘Crimson Text’, serif;
+font-size: 1.1rem;
+padding: 10px 14px;
+outline: none;
+transition: border-color 0.2s;
+}
+
+.setup-option input:focus {
+border-color: var(–gold);
+}
+
+.turn-text {
+font-family: ‘Playfair Display’, serif;
+font-size: 1rem;
+color: var(–cream2);
+text-align: center;
+margin-bottom: 12px;
+letter-spacing: 0.04em;
+}
+
+.skip-info {
+font-size: 0.9rem;
+color: var(–cream2);
+opacity: 0.7;
+text-align: center;
+margin-top: 8px;
+font-style: italic;
+}
+</style>
+
+</head>
+<body>
+
+<!-- Setup Modal -->
+
+<div class="modal-overlay" id="setup-screen">
+  <div class="modal">
+    <h2>Mezi Kostkami</h2>
+    <p>Kasino hra pro 2–4 hráče. Každý začíná se 100 Kč.</p>
+    <div class="setup-option">
+      <label>Hráč 1</label>
+      <input type="text" id="name1" value="Hráč 1" maxlength="16">
+    </div>
+    <div class="setup-option">
+      <label>Hráč 2</label>
+      <input type="text" id="name2" value="Hráč 2" maxlength="16">
+    </div>
+    <div class="setup-option">
+      <label>Hráč 3 (nepovinný)</label>
+      <input type="text" id="name3" placeholder="Nechte prázdné pro 2 hráče" maxlength="16">
+    </div>
+    <div class="setup-option">
+      <label>Hráč 4 (nepovinný)</label>
+      <input type="text" id="name4" placeholder="Nechte prázdné" maxlength="16">
+    </div>
+    <br>
+    <button class="action-btn primary" onclick="startGame()">Začít hru</button>
+  </div>
+</div>
+
+<!-- Game Over Modal -->
+
+<div class="modal-overlay hidden" id="gameover-screen">
+  <div class="modal">
+    <h2 id="winner-title">🏆 Vítěz!</h2>
+    <p id="winner-text"></p>
+    <button class="action-btn primary" onclick="location.reload()">Nová hra</button>
+  </div>
+</div>
+
+<div class="container">
+  <header>
+    <h1>Mezi Kostkami</h1>
+    <p>Kasino hra štěstí a odvahy</p>
+  </header>
+
+  <!-- Players -->
+
+  <div class="players-bar" id="players-bar"></div>
+
+  <!-- Game Table -->
+
+  <div class="game-table">
+    <div class="dice-section">
+
+```
+  <!-- First roll dice -->
+  <div class="dice-row" id="first-dice-row">
+    <div class="die-wrapper">
+      <div class="die empty" id="d1">?</div>
+      <div class="die-label">Nejnižší</div>
+    </div>
+    <div style="color:rgba(201,168,76,0.4);font-size:1.5rem;">–</div>
+    <div class="die-wrapper">
+      <div class="die empty" id="d2">?</div>
+      <div class="die-label">Střední</div>
+    </div>
+    <div style="color:rgba(201,168,76,0.4);font-size:1.5rem;">–</div>
+    <div class="die-wrapper">
+      <div class="die empty" id="d3">?</div>
+      <div class="die-label">Nejvyšší</div>
+    </div>
+  </div>
+
+  <div id="range-display" class="range-indicator hidden">Rozsah: ? – ?</div>
+
+  <!-- Bonus die -->
+  <div class="die-wrapper" id="bonus-die-wrapper" style="display:none;">
+    <div class="die empty" id="d-bonus">?</div>
+    <div class="die-label">Váš hod</div>
+  </div>
+
+</div>
+```
+
+  </div>
+
+  <!-- Controls -->
+
+  <div class="controls" id="controls">
+    <div class="turn-text" id="turn-text"></div>
+    <div class="phase-title" id="phase-title">Zahajte kolo</div>
+    <div id="control-area"></div>
+  </div>
+
+  <!-- Log -->
+
+  <div class="log" id="log"></div>
+</div>
+
+<script>
+let state = {};
+
+function roll(sides = 6) {
+  return Math.floor(Math.random() * sides) + 1;
+}
+
+function startGame() {
+  const names = [
+    document.getElementById('name1').value.trim() || 'Hráč 1',
+    document.getElementById('name2').value.trim() || 'Hráč 2',
+    document.getElementById('name3').value.trim(),
+    document.getElementById('name4').value.trim(),
+  ].filter(n => n.length > 0).slice(0, 4);
+
+  if (names.length < 2) { alert('Zadejte alespoň 2 hráče!'); return; }
+
+  state = {
+    players: names.map(n => ({ name: n, money: 100, eliminated: false })),
+    current: 0,
+    bank: 0,
+    phase: 'new-round',
+    firstRoll: null,
+    selectedBet: null,
+    lastResult: null,
+  };
+
+  document.getElementById('setup-screen').classList.add('hidden');
+  renderLog('system', '🎲 Hra začíná! Každý hráč má 100 Kč.');
+
+  // Collect ante from ALL players at game start
+  collectAnteFromAll('Počáteční vklad do banku');
+
+  checkEliminations();
+  renderAll();
+}
+
+// Collect 10 Kč ante from every active player at once
+function collectAnteFromAll(reason) {
+  const active = state.players.filter(p => !p.eliminated);
+  let total = 0;
+  active.forEach(p => {
+    const ante = Math.min(10, p.money);
+    if (ante > 0) {
+      p.money -= ante;
+      state.bank += ante;
+      total += ante;
+    }
+  });
+  if (total > 0) {
+    const names = active.map(p => p.name).join(', ');
+    renderLog('system', `💰 ${reason}: každý vložil 10 Kč do banku. (${names})`);
+  }
+}
+
+function renderAll() {
+  renderPlayers();
+  renderDice();
+  renderControls();
+}
+
+function renderPlayers() {
+  const bar = document.getElementById('players-bar');
+  const active = state.players.filter(p => !p.eliminated);
+  
+  // Bank in middle always
+  const bankHTML = `<div class="bank-display">
+    <div class="label">Banka</div>
+    <div class="bank-amount">${state.bank} Kč</div>
+  </div>`;
+
+  if (active.length === 2) {
+    bar.style.gridTemplateColumns = '1fr auto 1fr';
+    bar.innerHTML = playerCardHTML(state.players[0]) + bankHTML + playerCardHTML(state.players[1]);
+  } else {
+    const all = state.players.map(p => playerCardHTML(p)).join('');
+    bar.style.gridTemplateColumns = `repeat(${state.players.length}, 1fr) auto`;
+    bar.innerHTML = all + bankHTML;
+  }
+}
+
+function playerCardHTML(p) {
+  const idx = state.players.indexOf(p);
+  const isActive = idx === state.current && !p.eliminated;
+  return `<div class="player-card ${isActive ? 'active' : ''} ${p.eliminated ? 'eliminated' : ''}">
+    ${isActive ? '<div class="active-indicator"></div>' : ''}
+    <h3>${p.name}</h3>
+    <div class="player-money">${p.money} <span>Kč</span></div>
+    ${p.eliminated ? '<div style="font-size:0.75rem;color:#e06060;margin-top:4px;">VYŘAZEN</div>' : ''}
+  </div>`;
+}
+
+function renderDice() {
+  const d1 = document.getElementById('d1');
+  const d2 = document.getElementById('d2');
+  const d3 = document.getElementById('d3');
+  const rangeEl = document.getElementById('range-display');
+  const bonusWrapper = document.getElementById('bonus-die-wrapper');
+  const dBonus = document.getElementById('d-bonus');
+
+  if (!state.firstRoll) {
+    setDie(d1, null); setDie(d2, null); setDie(d3, null);
+    rangeEl.classList.add('hidden');
+    bonusWrapper.style.display = 'none';
+    d1.className = 'die empty'; d2.className = 'die empty'; d3.className = 'die empty';
+    return;
+  }
+
+  const sorted = [...state.firstRoll].sort((a,b) => a - b);
+  const [lo, mid, hi] = sorted;
+
+  setDie(d1, lo);
+  setDie(d2, mid);
+  setDie(d3, hi);
+
+  d1.className = 'die highlight-min';
+  d3.className = 'die highlight-max';
+  d2.className = 'die';
+
+  rangeEl.classList.remove('hidden');
+  rangeEl.textContent = `Rozsah: ${lo} – ${hi}  •  Musíte hodit mezi ${lo} a ${hi}`;
+
+  if (state.bonusRoll !== undefined) {
+    bonusWrapper.style.display = 'flex';
+    setDie(dBonus, state.bonusRoll);
+    const inBetween = state.bonusRoll > lo && state.bonusRoll < hi;
+    dBonus.className = 'die ' + (inBetween ? 'highlight-between' : 'highlight-miss');
+  } else if (state.phase === 'betting' || state.phase === 'bonus-rolled') {
+    bonusWrapper.style.display = 'flex';
+    setDie(dBonus, null);
+    dBonus.className = 'die empty';
+  } else {
+    bonusWrapper.style.display = 'none';
+  }
+}
+
+function setDie(el, val) {
+  el.textContent = val === null ? '?' : val;
+}
+
+function renderControls() {
+  const p = state.players[state.current];
+  const turnText = document.getElementById('turn-text');
+  const phaseTitle = document.getElementById('phase-title');
+  const area = document.getElementById('control-area');
+
+  turnText.textContent = `Na tahu: ${p.name} (${p.money} Kč)`;
+
+  if (state.phase === 'new-round') {
+    phaseTitle.textContent = 'Hoďte třemi kostkami';
+    area.innerHTML = `<button class="action-btn primary" onclick="doFirstRoll()">🎲 Hodit třemi kostkami</button>`;
+  }
+
+  else if (state.phase === 'rolled') {
+    const sorted = [...state.firstRoll].sort((a,b) => a - b);
+    const lo = sorted[0], hi = sorted[2];
+    if (lo === hi || hi - lo === 1) {
+      phaseTitle.textContent = 'Žádný platný rozsah – kolo přeskočeno';
+      area.innerHTML = `<p class="skip-info">Rozsah je příliš malý, nelze hrát. Přejděte na dalšího hráče.</p>
+        <br><button class="action-btn primary" onclick="nextPlayer()">Další hráč →</button>`;
+    } else {
+      phaseTitle.textContent = 'Vsaďte si – nebo přeskočte';
+      area.innerHTML = buildBetUI(p);
+    }
+  }
+
+  else if (state.phase === 'betting') {
+    phaseTitle.textContent = `Vsadili jste ${state.selectedBet} Kč – hoďte!`;
+    area.innerHTML = `<button class="action-btn primary" onclick="doBonusRoll()">🎲 Hodit kostkou</button>`;
+  }
+
+  else if (state.phase === 'result') {
+    phaseTitle.textContent = state.lastResult === 'win' ? '✨ Výhra!' : '💸 Prohra!';
+    area.innerHTML = `<button class="action-btn primary" onclick="nextPlayer()">Další hráč →</button>`;
+  }
+}
+
+function buildBetUI(p) {
+  const maxBet = p.money;
+  const bets = [10, 20, 30, 50].filter(b => b <= maxBet);
+  let html = `<div class="bet-row">`;
+  bets.forEach(b => {
+    html += `<button class="bet-btn ${state.selectedBet === b ? 'selected' : ''}" onclick="selectBet(${b})">${b} Kč</button>`;
+  });
+  if (maxBet > 0) {
+    html += `<button class="bet-btn ${state.selectedBet === maxBet ? 'selected' : ''}" onclick="selectBet(${maxBet})">All-in (${maxBet} Kč)</button>`;
+  }
+  html += `</div>`;
+
+  html += `<div class="btn-group">
+    <button class="action-btn primary" onclick="confirmBet()" ${!state.selectedBet ? 'disabled' : ''}>Vsadit a hrát</button>
+    <button class="action-btn secondary" onclick="skipBonusRoll()">Přeskočit</button>
+  </div>`;
+  return html;
+}
+
+function selectBet(amount) {
+  state.selectedBet = amount;
+  renderControls();
+}
+
+function doFirstRoll() {
+  const dice = [roll(), roll(), roll()];
+  state.firstRoll = dice;
+  state.bonusRoll = undefined;
+  state.phase = 'rolled';
+
+  // Animate dice
+  ['d1','d2','d3'].forEach(id => {
+    document.getElementById(id).classList.add('rolling');
+    setTimeout(() => document.getElementById(id).classList.remove('rolling'), 500);
+  });
+
+  const sorted = [...dice].sort((a,b)=>a-b);
+  renderLog('info', `${state.players[state.current].name} hodil: ${sorted.join(', ')}`);
+
+  setTimeout(() => renderAll(), 150);
+}
+
+function confirmBet() {
+  if (!state.selectedBet) return;
+  state.phase = 'betting';
+  renderAll();
+}
+
+function skipBonusRoll() {
+  renderLog('info', `${state.players[state.current].name} přeskočil bonusový hod.`);
+  nextPlayer();
+}
+
+function doBonusRoll() {
+  const bonus = roll();
+  state.bonusRoll = bonus;
+  const sorted = [...state.firstRoll].sort((a,b)=>a-b);
+  const lo = sorted[0], hi = sorted[2];
+  const inBetween = bonus > lo && bonus < hi;
+
+  const bonusEl = document.getElementById('d-bonus');
+  bonusEl.classList.add('rolling');
+  setTimeout(() => bonusEl.classList.remove('rolling'), 500);
+
+  const p = state.players[state.current];
+  const bet = state.selectedBet;
+
+  if (inBetween) {
+    // Win – take from bank
+    const won = Math.min(bet, state.bank);
+    p.money += won;
+    state.bank -= won;
+    state.lastResult = 'win';
+    renderLog('win', `🏆 ${p.name} hodil ${bonus} (mezi ${lo} a ${hi}). Vyhrál ${won} Kč!`);
+
+    // If bank is now empty, collect ante from all before next turn
+    if (state.bank === 0) {
+      checkEliminations();
+      const alive = state.players.filter(q => !q.eliminated);
+      if (alive.length > 1) {
+        renderLog('system', '🏦 Banka je prázdná!');
+        collectAnteFromAll('Nový vklad do banku');
+      }
+    }
+  } else {
+    // Loss
+    const lost = Math.min(bet, p.money);
+    p.money -= lost;
+    state.bank += lost;
+    state.lastResult = 'loss';
+    renderLog('loss', `💸 ${p.name} hodil ${bonus} (mimo ${lo}–${hi}). Prohrál ${lost} Kč.`);
+  }
+
+  state.phase = 'result';
+  checkEliminations();
+
+  setTimeout(() => renderAll(), 200);
+}
+
+function checkEliminations() {
+  state.players.forEach(p => {
+    if (!p.eliminated && p.money <= 0) {
+      p.eliminated = true;
+      p.money = 0;
+      renderLog('loss', `💀 ${p.name} nemá žádné peníze a je vyřazen!`);
+    }
+  });
+  const alive = state.players.filter(p => !p.eliminated);
+  if (alive.length === 1) {
+    endGame(alive[0]);
+  }
+}
+
+function endGame(winner) {
+  document.getElementById('gameover-screen').classList.remove('hidden');
+  document.getElementById('winner-title').textContent = `🏆 ${winner.name} vyhrál!`;
+  document.getElementById('winner-text').textContent = `Gratulujeme! ${winner.name} přežil a odnáší si ${winner.money + state.bank} Kč.`;
+}
+
+function nextPlayer() {
+  // Move to next non-eliminated player
+  let next = (state.current + 1) % state.players.length;
+  let tries = 0;
+  while (state.players[next].eliminated && tries < state.players.length) {
+    next = (next + 1) % state.players.length;
+    tries++;
+  }
+
+  state.current = next;
+  state.firstRoll = null;
+  state.bonusRoll = undefined;
+  state.selectedBet = null;
+  state.lastResult = null;
+  state.phase = 'new-round';
+
+  checkEliminations();
+  renderAll();
+}
+
+function renderLog(type, msg) {
+  const log = document.getElementById('log');
+  const entry = document.createElement('div');
+  entry.className = `log-entry ${type}`;
+  entry.textContent = msg;
+  log.insertBefore(entry, log.firstChild);
+  // Keep max 40 entries
+  while (log.children.length > 40) log.removeChild(log.lastChild);
+}
+</script>
+
+</body>
+</html>
