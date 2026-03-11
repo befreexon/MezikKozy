@@ -36,6 +36,13 @@
           <div class="stat-label">Úspěšnost</div>
         </div>
       </div>
+
+      {% with net=profile.net_money %}
+      <div class="net-money {% if net >= 0 %}net-money--positive{% else %}net-money--negative{% endif %}">
+        <span class="net-money-label">Celkový zisk / ztráta</span>
+        <span class="net-money-value">{% if net >= 0 %}+{% endif %}{{ net }} Kč</span>
+      </div>
+      {% endwith %}
     </section>
 
     <section class="card">
@@ -46,7 +53,9 @@
             <div class="result-item result-item--{% if result.won %}win{% else %}loss{% endif %}">
               <span class="result-room">{{ result.room.name }}</span>
               <span class="result-outcome">{% if result.won %}Výhra{% else %}Prohra{% endif %}</span>
-              <span class="result-money">{{ result.final_money }} Kč</span>
+              <span class="result-money">
+                {% if result.net_money >= 0 %}+{% endif %}{{ result.net_money }} Kč
+              </span>
               <span class="result-date">{{ result.played_at|date:"d.m.Y" }}</span>
             </div>
           {% endfor %}

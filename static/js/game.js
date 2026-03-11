@@ -205,8 +205,9 @@ function renderControls() {
 }
 
 function buildBetUI(p) {
+  const baseBet = state.base_bet || 10;
   const maxBet = p.money;
-  const amounts = [10, 20, 30, 50].filter((b) => b <= maxBet);
+  const amounts = [1, 2, 3, 5].map((m) => m * baseBet).filter((b) => b < maxBet);
   const selected = state.selected_bet;
 
   let html = '<div class="bet-row">';

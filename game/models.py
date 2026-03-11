@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils import timezone
 
 
 class GameRoom(models.Model):
@@ -17,7 +18,10 @@ class GameRoom(models.Model):
     host = models.ForeignKey(User, on_delete=models.CASCADE, related_name="hosted_rooms")
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_WAITING)
     max_players = models.IntegerField(default=4)
+    starting_money = models.IntegerField(default=100)
+    base_bet = models.IntegerField(default=10)
     created_at = models.DateTimeField(auto_now_add=True)
+    last_activity = models.DateTimeField(default=timezone.now)
     game_state = models.JSONField(null=True, blank=True)
 
     class Meta:
@@ -51,10 +55,15 @@ class GameResult(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="game_results")
     won = models.BooleanField()
     final_money = models.IntegerField()
+    starting_money = models.IntegerField(default=100)
     played_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ["-played_at"]
+
+    @property
+    def net_money(self):
+        return self.final_money - self.starting_money
 
     def __str__(self):
         result = "vyhrál" if self.won else "prohrál"

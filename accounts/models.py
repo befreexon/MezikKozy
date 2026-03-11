@@ -22,6 +22,15 @@ class UserProfile(models.Model):
             return 0.0
         return round(self.games_won / self.games_played * 100, 1)
 
+    @property
+    def net_money(self):
+        from django.db.models import Sum, F
+        from game.models import GameResult
+        result = GameResult.objects.filter(user=self.user).aggregate(
+            net=Sum(F("final_money") - F("starting_money"))
+        )
+        return result["net"] or 0
+
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):

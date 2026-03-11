@@ -195,6 +195,17 @@ body::before {
   color: var(--cream);
 }
 
+.action-btn.danger {
+  background: transparent;
+  border: 1px solid rgba(204, 34, 34, 0.4);
+  color: #e06060;
+}
+
+.action-btn.danger:hover {
+  background: rgba(204, 34, 34, 0.12);
+  border-color: #e06060;
+}
+
 .action-btn:disabled {
   opacity: 0.35;
   cursor: not-allowed;
@@ -334,6 +345,7 @@ body::before {
 .room-info { display: flex; flex-direction: column; gap: 2px; flex: 1; }
 .room-name { font-weight: 600; color: var(--cream); font-size: 1rem; }
 .room-host { font-size: 0.85rem; color: var(--cream2); opacity: 0.7; }
+.room-config { font-size: 0.8rem; color: var(--gold); opacity: 0.7; }
 
 .room-meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .room-players { font-size: 0.85rem; color: var(--cream2); }
@@ -469,3 +481,44 @@ body::before {
 .result-item--loss .result-outcome { color: #e06060; }
 .result-money { color: var(--cream2); }
 .result-date { color: var(--cream2); opacity: 0.6; font-size: 0.85rem; }
+
+/* ── Room settings (lobby) ─────────────────────────────────────────────────── */
+.room-settings { display: flex; flex-direction: column; gap: 8px; }
+
+.setting-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  font-size: 0.95rem;
+}
+
+.setting-row:last-child { border-bottom: none; }
+.setting-label { color: var(--cream2); opacity: 0.8; }
+.setting-value { color: var(--gold); font-weight: 600; }
+
+/* ── Net money (profile) ───────────────────────────────────────────────────── */
+.net-money {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+.net-money--positive {
+  background: rgba(201, 168, 76, 0.1);
+  border: 1px solid rgba(201, 168, 76, 0.25);
+}
+
+.net-money--negative {
+  background: rgba(204, 34, 34, 0.08);
+  border: 1px solid rgba(204, 34, 34, 0.2);
+}
+
+.net-money-label { color: var(--cream2); opacity: 0.8; }
+.net-money--positive .net-money-value { color: var(--gold-light); font-weight: 700; font-size: 1.1rem; }
+.net-money--negative .net-money-value { color: #e06060; font-weight: 700; font-size: 1.1rem; }

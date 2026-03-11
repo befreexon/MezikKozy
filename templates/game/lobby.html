@@ -48,11 +48,35 @@
         <a href="{% url 'game:home' %}" class="action-btn secondary" style="text-decoration:none;text-align:center;margin-top:10px;">
           Opustit místnost
         </a>
+
+        {% if is_host %}
+          <form method="post" action="{% url 'game:delete_room' room.id %}" style="margin-top:8px;"
+                onsubmit="return confirm('Opravdu smazat místnost?');">
+            {% csrf_token %}
+            <button type="submit" class="action-btn danger" style="width:100%;">Smazat místnost</button>
+          </form>
+        {% endif %}
       </div>
     </section>
 
     <section class="card">
-      <h2 class="card-title">Odkaz do místnosti</h2>
+      <h2 class="card-title">Nastavení místnosti</h2>
+      <div class="room-settings">
+        <div class="setting-row">
+          <span class="setting-label">Počáteční peníze</span>
+          <span class="setting-value">{{ room.starting_money }} Kč</span>
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">Základní vklad</span>
+          <span class="setting-value">{{ room.base_bet }} Kč</span>
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">Max. hráčů</span>
+          <span class="setting-value">{{ room.max_players }}</span>
+        </div>
+      </div>
+
+      <h2 class="card-title" style="margin-top:1.5rem;">Odkaz do místnosti</h2>
       <p style="word-break:break-all;color:var(--cream2);font-size:0.95rem;">
         {{ request.build_absolute_uri }}
       </p>

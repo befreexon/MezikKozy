@@ -35,6 +35,7 @@ class GameConsumer(AsyncWebsocketConsumer):
     async def disconnect(self, close_code):
         await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
         await self.mark_player_active(False)
+        await self.update_room_activity_if_empty()
         await self.broadcast_room_update()
 
     async def receive(self, text_data):
@@ -67,7 +68,7 @@ class GameConsumer(AsyncWebsocketConsumer):
             )
             return
 
-        state = create_game_state(players)
+        state = create_game_state(players, starting_money=room.starting_money, base_bet=room.base_bet)
         await self.set_room_playing(state)
 
         await self.channel_layer.group_send(
@@ -214,12 +215,14 @@ class GameConsumer(AsyncWebsocketConsumer):
             return
 
         winner_id = state.get("winner_id")
+        starting_money = room.starting_money
         results = [
             GameResult(
                 room=room,
                 user_id=p["user_id"],
                 won=(p["user_id"] == winner_id),
                 final_money=p["money"],
+                starting_money=starting_money,
             )
             for p in state["players"]
         ]
@@ -229,4 +232,14 @@ class GameConsumer(AsyncWebsocketConsumer):
             UserProfile.objects.filter(user_id=p["user_id"]).update(
                 games_played=django_models.F("games_played") + 1,
                 games_won=django_models.F("games_won") + (1 if p["user_id"] == winner_id else 0),
+            )
+
+    @database_sync_to_async
+    def update_room_activity_if_empty(self):
+        from .models import GameRoom, GameRoomPlayer
+        from django.utils import timezone
+
+        if not GameRoomPlayer.objects.filter(room_id=self.room_id, active=True).exists():
+            GameRoom.objects.filter(id=self.room_id, status=GameRoom.STATUS_WAITING).update(
+                last_activity=timezone.now()
             )

@@ -4,26 +4,25 @@ No Django dependencies — easy to test in isolation.
 """
 import random
 
-STARTING_MONEY = 100
-ANTE_AMOUNT = 10
-
 
 def roll_dice(n=1):
     return [random.randint(1, 6) for _ in range(n)]
 
 
-def create_game_state(players):
+def create_game_state(players, starting_money=100, base_bet=10):
     """
     Create initial game state.
 
     players: list of dicts with keys: name, user_id
+    starting_money: initial amount each player receives
+    base_bet: minimum bet unit (also used as ante amount)
     """
     state = {
         "players": [
             {
                 "name": p["name"],
                 "user_id": p["user_id"],
-                "money": STARTING_MONEY,
+                "money": starting_money,
                 "eliminated": False,
             }
             for p in players
@@ -36,6 +35,7 @@ def create_game_state(players):
         "last_result": None,
         "bonus_roll": None,
         "winner_id": None,
+        "base_bet": base_bet,
         "log": [],
     }
     _collect_ante(state, "Počáteční vklad do banku")
@@ -86,16 +86,17 @@ def _collect_ante(state, reason="Nový vklad do banku"):
     active = _get_active_players(state)
     if not active:
         return
+    ante = state.get("base_bet", 10)
     total = 0
     for player in active:
-        amount = min(ANTE_AMOUNT, player["money"])
+        amount = min(ante, player["money"])
         if amount > 0:
             player["money"] -= amount
             state["bank"] += amount
             total += amount
     if total > 0:
         names = ", ".join(p["name"] for p in active)
-        _add_log(state, f"{reason}: každý vložil {ANTE_AMOUNT} Kč do banku. ({names})", "system")
+        _add_log(state, f"{reason}: každý vložil {ante} Kč do banku. ({names})", "system")
 
 
 def _check_eliminations(state):
