@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static i18n %}
 
 {% block title %}Profil {{ profile.user.username }} – Mezi Kostkami{% endblock %}
 
@@ -11,48 +11,53 @@
 <div class="container">
   <header class="page-header">
     <h1>{{ profile.user.username }}</h1>
-    <p>Hráčský profil</p>
+    <p>{% trans "Hráčský profil" %}</p>
   </header>
 
   <div class="profile-grid">
 
     <section class="card">
-      <h2 class="card-title">Statistiky</h2>
+      <h2 class="card-title">{% trans "Statistiky" %}</h2>
       <div class="stats-grid">
         <div class="stat-item">
           <div class="stat-value">{{ profile.games_played }}</div>
-          <div class="stat-label">Odehráno her</div>
+          <div class="stat-label">{% trans "Odehráno her" %}</div>
         </div>
         <div class="stat-item stat-item--win">
           <div class="stat-value">{{ profile.games_won }}</div>
-          <div class="stat-label">Výher</div>
+          <div class="stat-label">{% trans "Výher" %}</div>
         </div>
         <div class="stat-item stat-item--loss">
           <div class="stat-value">{{ profile.games_lost }}</div>
-          <div class="stat-label">Proher</div>
+          <div class="stat-label">{% trans "Proher" %}</div>
         </div>
         <div class="stat-item">
           <div class="stat-value">{{ profile.win_rate }}%</div>
-          <div class="stat-label">Úspěšnost</div>
+          <div class="stat-label">{% trans "Úspěšnost" %}</div>
         </div>
+      </div>
+      <div style="text-align:center;margin-top:12px;">
+        <span class="level-badge {% if profile.level >= 2 %}level--up{% elif profile.level <= 0 %}level--down{% else %}level--base{% endif %}" style="font-size:0.9rem;padding:3px 10px;">
+          Level {{ profile.level }}
+        </span>
       </div>
 
       {% with net=profile.net_money %}
       <div class="net-money {% if net >= 0 %}net-money--positive{% else %}net-money--negative{% endif %}">
-        <span class="net-money-label">Celkový zisk / ztráta</span>
+        <span class="net-money-label">{% trans "Celkový zisk / ztráta" %}</span>
         <span class="net-money-value">{% if net >= 0 %}+{% endif %}{{ net }} Kč</span>
       </div>
       {% endwith %}
     </section>
 
     <section class="card">
-      <h2 class="card-title">Poslední hry</h2>
+      <h2 class="card-title">{% trans "Poslední hry" %}</h2>
       {% if recent_results %}
         <div class="results-list">
           {% for result in recent_results %}
             <div class="result-item result-item--{% if result.won %}win{% else %}loss{% endif %}">
               <span class="result-room">{{ result.room.name }}</span>
-              <span class="result-outcome">{% if result.won %}Výhra{% else %}Prohra{% endif %}</span>
+              <span class="result-outcome">{% if result.won %}{% trans "Výhra" %}{% else %}{% trans "Prohra" %}{% endif %}</span>
               <span class="result-money">
                 {% if result.net_money >= 0 %}+{% endif %}{{ result.net_money }} Kč
               </span>
@@ -61,7 +66,7 @@
           {% endfor %}
         </div>
       {% else %}
-        <p class="empty-state">Zatím žádné odehrané hry.</p>
+        <p class="empty-state">{% trans "Zatím žádné odehrané hry." %}</p>
       {% endif %}
     </section>
 

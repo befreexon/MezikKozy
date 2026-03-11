@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% load static i18n %}
+
+{% block title %}{% trans "Žebříček" %} – Mezi Kostkami{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/accounts.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <header class="page-header">
+    <h1>{% trans "Žebříček" %}</h1>
+    <p>{% trans "Nejlepší a nejhorší hráči" %}</p>
+  </header>
+
+  <section class="card">
+    {% if players %}
+      <div class="leaderboard-table">
+        <div class="lb-header">
+          <span>#</span>
+          <span>{% trans "Hráč" %}</span>
+          <span>{% trans "Level" %}</span>
+          <span>{% trans "Zisk / ztráta" %}</span>
+          <span>{% trans "Odehráno" %}</span>
+          <span>{% trans "Výher" %}</span>
+        </div>
+        {% for p in players %}
+          <a href="{% url 'accounts:public_profile' p.user_id %}" class="lb-row lb-row--{% if p.level >= 2 %}up{% elif p.level <= 0 %}down{% else %}base{% endif %}">
+            <span class="lb-rank">{{ forloop.counter }}</span>
+            <span class="lb-name">{{ p.username }}</span>
+            <span><span class="level-badge {% if p.level >= 2 %}level--up{% elif p.level <= 0 %}level--down{% else %}level--base{% endif %}">Lv {{ p.level }}</span></span>
+            <span class="lb-net {% if p.net_money >= 0 %}lb-net--pos{% else %}lb-net--neg{% endif %}">
+              {% if p.net_money >= 0 %}+{% endif %}{{ p.net_money }} Kč
+            </span>
+            <span class="lb-stat">{{ p.games_played }}</span>
+            <span class="lb-stat">{{ p.games_won }}</span>
+          </a>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="empty-state">{% trans "Zatím žádní hráči." %}</p>
+    {% endif %}
+  </section>
+
+</div>
+{% endblock %}

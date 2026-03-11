@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+{% load static i18n %}
+{% get_current_language as current_lang %}
+
+{% block title %}{% trans "Pravidla" %} – Mezi Kostkami{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/accounts.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <header class="page-header">
+    <h1>{% trans "Pravidla" %}</h1>
+  </header>
+
+{% if current_lang == 'en' %}
+
+  <section class="card" style="max-width:780px;margin:0 auto 24px;">
+    <h2 class="card-title">🎲 How to Play</h2>
+
+    <h3 style="color:var(--gold);margin-top:1rem;">Goal</h3>
+    <p>Be the last player with money. All other players must go bankrupt.</p>
+
+    <h3 style="color:var(--gold);margin-top:1rem;">Game Setup</h3>
+    <ul>
+      <li>2–4 players join a room created by the host.</li>
+      <li>Each player starts with the amount set by the host (default 100 Kč).</li>
+      <li>Before the first round, every player pays an <strong>ante</strong> equal to the base bet into the shared bank.</li>
+    </ul>
+
+    <h3 style="color:var(--gold);margin-top:1rem;">A Round</h3>
+    <ol>
+      <li><strong>Roll three dice.</strong> They are sorted: lowest – middle – highest.<br>
+          If all three are within a range of 1 (e.g. 3–4–4), the roll is <em>invalid</em>, the turn passes immediately.</li>
+      <li><strong>Bet.</strong> The active player chooses how much to wager — up to the amount currently in the bank.<br>
+          They can also <em>skip</em> (pass the turn without betting).</li>
+      <li><strong>Roll the bonus die.</strong> One die is rolled. If it lands <strong>strictly between</strong> the lowest and highest of the first roll, the player <em>wins</em> their bet from the bank. Otherwise they <em>lose</em> that amount to the bank.</li>
+      <li>The turn passes to the next active player.</li>
+      <li>When the bank reaches zero, every player pays a new ante before the next roll.</li>
+    </ol>
+
+    <h3 style="color:var(--gold);margin-top:1rem;">Elimination & Victory</h3>
+    <p>A player is eliminated when their balance reaches 0. The last player with money wins and takes the bank.</p>
+
+    <h3 style="color:var(--gold);margin-top:1rem;">⏱ Turn Timer</h3>
+    <p>Each player has <strong>5 minutes</strong> per turn. If the timer expires, the player is automatically eliminated and loses their entire balance to the bank.</p>
+  </section>
+
+  <section class="card" style="max-width:780px;margin:0 auto 24px;">
+    <h2 class="card-title">🏆 Leaderboard & Levels</h2>
+
+    <p>After every game, results are recorded. Your <strong>net profit/loss</strong> across all games determines your Level.</p>
+
+    <table class="rules-table">
+      <thead><tr><th>Level</th><th>Net profit / loss</th><th>Badge colour</th></tr></thead>
+      <tbody>
+        <tr><td><span class="level-badge level--up">Lv 3</span></td><td>+300 Kč or more</td><td style="color:var(--gold)">Gold</td></tr>
+        <tr><td><span class="level-badge level--up">Lv 2</span></td><td>+200 to +299 Kč</td><td style="color:var(--gold)">Gold</td></tr>
+        <tr><td><span class="level-badge level--base">Lv 1</span></td><td>−199 to +199 Kč</td><td style="color:var(--cream2)">Silver (default)</td></tr>
+        <tr><td><span class="level-badge level--down">Lv 0</span></td><td>−200 to −299 Kč</td><td style="color:#e06060">Red</td></tr>
+        <tr><td><span class="level-badge level--down">Lv −1</span></td><td>−300 Kč or less</td><td style="color:#e06060">Red</td></tr>
+      </tbody>
+    </table>
+
+    <p style="margin-top:1rem;">The leaderboard ranks all players by level (highest first), then by net money within the same level.</p>
+    <p>Levels are displayed next to player names in the lobby and during the game.</p>
+  </section>
+
+{% else %}
+
+  <section class="card" style="max-width:780px;margin:0 auto 24px;">
+    <h2 class="card-title">🎲 Jak se hraje</h2>
+
+    <h3 style="color:var(--gold);margin-top:1rem;">Cíl hry</h3>
+    <p>Buď posledním hráčem s penězi. Všichni ostatní musí zkrachovat.</p>
+
+    <h3 style="color:var(--gold);margin-top:1rem;">Příprava hry</h3>
+    <ul>
+      <li>2–4 hráčů se připojí do místnosti, kterou vytvořil hostitel.</li>
+      <li>Každý hráč začíná s částkou nastavenou hostitelem (výchozí 100 Kč).</li>
+      <li>Před prvním kolem každý hráč zaplatí <strong>ante</strong> (základní vklad) do společné banky.</li>
+    </ul>
+
+    <h3 style="color:var(--gold);margin-top:1rem;">Průběh kola</h3>
+    <ol>
+      <li><strong>Hoď třemi kostkami.</strong> Výsledek se seřadí: nejnižší – střední – nejvyšší.<br>
+          Pokud všechny tři padnou do rozsahu 1 (např. 3–4–4), hod je <em>neplatný</em> a tah okamžitě přejde dál.</li>
+      <li><strong>Vsaď.</strong> Aktivní hráč zvolí, kolik vsadí — maximálně tolik, kolik je aktuálně v bance.<br>
+          Může také <em>přeskočit</em> (předat tah bez sázky).</li>
+      <li><strong>Hoď bonusovou kostkou.</strong> Padne jedno číslo. Pokud leží <strong>přesně mezi</strong> nejnižší a nejvyšší hodnotou prvního hodu, hráč <em>vyhraje</em> vsazenou částku z banky. Jinak o ni <em>přijde</em>.</li>
+      <li>Tah přejde na dalšího aktivního hráče.</li>
+      <li>Když se banka vyprázdní, každý hráč před dalším hodem opět zaplatí ante.</li>
+    </ol>
+
+    <h3 style="color:var(--gold);margin-top:1rem;">Vyřazení a vítězství</h3>
+    <p>Hráč je vyřazen, jakmile jeho zůstatek klesne na 0. Poslední hráč s penězi vyhrává a bere celou banku.</p>
+
+    <h3 style="color:var(--gold);margin-top:1rem;">⏱ Časovač tahu</h3>
+    <p>Každý hráč má na svůj tah <strong>5 minut</strong>. Pokud čas vyprší, hráč je automaticky vyřazen a celý jeho zůstatek přejde do banky.</p>
+  </section>
+
+  <section class="card" style="max-width:780px;margin:0 auto 24px;">
+    <h2 class="card-title">🏆 Žebříček a Levely</h2>
+
+    <p>Po každé hře se výsledky zaznamenají. Tvůj <strong>celkový čistý zisk/ztráta</strong> ze všech her určuje tvůj Level.</p>
+
+    <table class="rules-table">
+      <thead><tr><th>Level</th><th>Celkový zisk / ztráta</th><th>Barva odznaku</th></tr></thead>
+      <tbody>
+        <tr><td><span class="level-badge level--up">Lv 3</span></td><td>+300 Kč a více</td><td style="color:var(--gold)">Zlatá</td></tr>
+        <tr><td><span class="level-badge level--up">Lv 2</span></td><td>+200 až +299 Kč</td><td style="color:var(--gold)">Zlatá</td></tr>
+        <tr><td><span class="level-badge level--base">Lv 1</span></td><td>−199 až +199 Kč</td><td style="color:var(--cream2)">Stříbrná (výchozí)</td></tr>
+        <tr><td><span class="level-badge level--down">Lv 0</span></td><td>−200 až −299 Kč</td><td style="color:#e06060">Červená</td></tr>
+        <tr><td><span class="level-badge level--down">Lv −1</span></td><td>−300 Kč a méně</td><td style="color:#e06060">Červená</td></tr>
+      </tbody>
+    </table>
+
+    <p style="margin-top:1rem;">Žebříček řadí všechny hráče podle levelu (nejvyšší první), při shodném levelu pak podle výše čistého zisku.</p>
+    <p>Levely jsou viditelné u jmen hráčů v čekárně i během hry.</p>
+  </section>
+
+{% endif %}
+
+</div>
+{% endblock %}

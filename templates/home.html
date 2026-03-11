@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static i18n %}
 
 {% block title %}Mezi Kostkami – Lobby{% endblock %}
 
@@ -7,63 +7,118 @@
 <div class="container">
   <header class="page-header">
     <h1>Mezi Kostkami</h1>
-    <p>Kasino hra štěstí a odvahy</p>
+    <p>{% trans "Kasino hra štěstí a odvahy" %}</p>
   </header>
 
   <div class="home-grid">
 
     <!-- Create room -->
     <section class="card">
-      <h2 class="card-title">Vytvořit místnost</h2>
+      <h2 class="card-title">{% trans "Vytvořit místnost" %}</h2>
       <form method="post" action="{% url 'game:create_room' %}">
         {% csrf_token %}
         <div class="form-group">
-          <label for="room-name">Název místnosti</label>
+          <label for="room-name">{% trans "Název místnosti" %}</label>
           <input type="text" id="room-name" name="name" placeholder="Místnost {{ user.username }}" maxlength="100">
         </div>
         <div class="form-group">
-          <label for="starting-money">Počáteční peníze každého hráče (Kč)</label>
+          <label for="starting-money">{% trans "Počáteční peníze každého hráče (Kč)" %}</label>
           <input type="number" id="starting-money" name="starting_money" value="100" min="10" max="10000" step="10">
         </div>
         <div class="form-group">
-          <label for="base-bet">Základní vklad (Kč)</label>
+          <label for="base-bet">{% trans "Základní vklad (Kč)" %}</label>
           <input type="number" id="base-bet" name="base_bet" value="10" min="1" max="5000" step="1">
         </div>
-        <button type="submit" class="action-btn primary">Vytvořit místnost</button>
+        <button type="submit" class="action-btn primary">{% trans "Vytvořit místnost" %}</button>
       </form>
     </section>
 
     <!-- Open rooms -->
     <section class="card">
-      <h2 class="card-title">Otevřené místnosti</h2>
+      <h2 class="card-title">{% trans "Otevřené místnosti" %}</h2>
       {% if rooms %}
-        <div class="room-list">
+        <div class="room-list" id="room-list">
           {% for room in rooms %}
             <div class="room-item">
               <div class="room-info">
                 <span class="room-name">{{ room.name }}</span>
-                <span class="room-host">Hostitel: {{ room.host.username }}</span>
-                <span class="room-config">{{ room.starting_money }} Kč · vklad {{ room.base_bet }} Kč</span>
+                <span class="room-host">{% trans "Hostitel:" %} {{ room.host.username }}</span>
+                <span class="room-config">{{ room.starting_money }} Kč · {% trans "Základní vklad" %} {{ room.base_bet }} Kč</span>
               </div>
               <div class="room-meta">
                 <span class="room-status room-status--{{ room.status }}">
-                  {% if room.status == 'waiting' %}Čeká{% else %}Hraje{% endif %}
+                  {% if room.status == 'waiting' %}{% trans "Čeká" %}{% else %}{% trans "Hraje" %}{% endif %}
                 </span>
-                <span class="room-players">{{ room.active_player_count }}/{{ room.max_players }} hráčů</span>
+                <span class="room-players">{{ room.active_player_count }}/{{ room.max_players }}</span>
                 {% if room.status == 'waiting' %}
-                  <a href="{% url 'game:join_room' room.id %}" class="action-btn primary action-btn--small">Připojit</a>
+                  <a href="{% url 'game:join_room' room.id %}" class="action-btn primary action-btn--small">{% trans "Připojit" %}</a>
                 {% else %}
-                  <span class="room-closed">Probíhá</span>
+                  <span class="room-closed">{% trans "Probíhá" %}</span>
                 {% endif %}
               </div>
             </div>
           {% endfor %}
         </div>
       {% else %}
-        <p class="empty-state">Žádné otevřené místnosti. Vytvořte novou!</p>
+        <div id="room-list"></div>
+        <p class="empty-state" id="room-empty">{% trans "Žádné otevřené místnosti. Vytvořte novou!" %}</p>
       {% endif %}
     </section>
 
   </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function() {
+  const joinLabel = "{% trans 'Připojit' %}";
+  const waitLabel = "{% trans 'Čeká' %}";
+  const playLabel = "{% trans 'Hraje' %}";
+  const inProgressLabel = "{% trans 'Probíhá' %}";
+  const hostLabel = "{% trans 'Hostitel:' %}";
+  const baseBetLabel = "{% trans 'Základní vklad' %}";
+  const emptyLabel = "{% trans 'Žádné otevřené místnosti. Vytvořte novou!' %}";
+
+  function escHtml(s) {
+    return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  }
+
+  function renderRooms(rooms) {
+    const list = document.getElementById("room-list");
+    const empty = document.getElementById("room-empty");
+    if (!list) return;
+    if (rooms.length === 0) {
+      list.innerHTML = "";
+      if (empty) empty.style.display = "";
+      return;
+    }
+    if (empty) empty.style.display = "none";
+    list.innerHTML = rooms.map(r => `
+      <div class="room-item">
+        <div class="room-info">
+          <span class="room-name">${escHtml(r.name)}</span>
+          <span class="room-host">${hostLabel} ${escHtml(r.host)}</span>
+          <span class="room-config">${r.starting_money} Kč · ${baseBetLabel} ${r.base_bet} Kč</span>
+        </div>
+        <div class="room-meta">
+          <span class="room-status room-status--${r.status}">${r.status === 'waiting' ? waitLabel : playLabel}</span>
+          <span class="room-players">${r.player_count}/${r.max_players}</span>
+          ${r.status === 'waiting'
+            ? `<a href="/join/${r.id}/" class="action-btn primary action-btn--small">${joinLabel}</a>`
+            : `<span class="room-closed">${inProgressLabel}</span>`}
+        </div>
+      </div>`).join("");
+  }
+
+  function refreshRooms() {
+    fetch("{% url 'game:rooms_api' %}")
+      .then(r => r.json())
+      .then(data => renderRooms(data.rooms))
+      .catch(() => {});
+  }
+
+  setInterval(refreshRooms, 5 * 60 * 1000);
+})();
+</script>
 {% endblock %}

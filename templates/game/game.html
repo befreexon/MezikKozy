@@ -63,12 +63,23 @@
   <!-- Controls -->
   <div class="controls" id="controls">
     <div class="turn-text" id="turn-text">Načítání…</div>
+    <div id="turn-countdown" class="turn-countdown"></div>
     <div class="phase-title" id="phase-title">Připojování k serveru…</div>
     <div id="control-area"></div>
   </div>
 
-  <!-- Log -->
-  <div class="log" id="log"></div>
+  <!-- Log + Chat -->
+  <div class="log-chat-row">
+    <div class="log" id="log"></div>
+    <div class="chat-panel">
+      <div class="chat-panel-title">💬 Chat</div>
+      <div id="chat-messages" class="chat-messages"></div>
+      <div class="chat-input-row">
+        <input type="text" id="chat-input" class="chat-input" placeholder="Zpráva…" maxlength="500" autocomplete="off">
+        <button id="chat-send" class="action-btn primary chat-send-btn">➤</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -76,4 +87,5 @@
   const CURRENT_USER_ID = {{ current_user_id }};
 </script>
 <script src="{% static 'js/game.js' %}"></script>
+<script src="{% static 'js/chat.js' %}"></script>
 {% endblock %}

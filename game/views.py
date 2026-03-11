@@ -57,8 +57,37 @@ def create_room(request):
 def delete_room(request, room_id):
     room = get_object_or_404(GameRoom, id=room_id)
     if request.method == "POST" and room.host == request.user and room.status == GameRoom.STATUS_WAITING:
+        from channels.layers import get_channel_layer
+        from asgiref.sync import async_to_sync
+        async_to_sync(get_channel_layer().group_send)(
+            f"game_{room_id}",
+            {"type": "room_deleted_broadcast"},
+        )
         room.delete()
     return redirect("game:home")
+
+
+@login_required
+def rooms_api(request):
+    from django.http import JsonResponse
+    _cleanup_stale_rooms()
+    rooms = GameRoom.objects.filter(
+        status__in=[GameRoom.STATUS_WAITING, GameRoom.STATUS_PLAYING]
+    ).select_related("host")
+    data = [
+        {
+            "id": r.id,
+            "name": r.name,
+            "host": r.host.username,
+            "status": r.status,
+            "player_count": r.active_player_count,
+            "max_players": r.max_players,
+            "starting_money": r.starting_money,
+            "base_bet": r.base_bet,
+        }
+        for r in rooms
+    ]
+    return JsonResponse({"rooms": data})
 
 
 @login_required
@@ -107,6 +136,10 @@ def lobby(request, room_id):
             "is_host": room.host_id == request.user.id,
         },
     )
+
+
+def rules(request):
+    return render(request, "game/rules.html")
 
 
 @login_required

@@ -10,4 +10,6 @@ urlpatterns = [
     path("room/<int:room_id>/", views.lobby, name="lobby"),
     path("room/<int:room_id>/play/", views.game_view, name="game"),
     path("room/<int:room_id>/delete/", views.delete_room, name="delete_room"),
+    path("api/rooms/", views.rooms_api, name="rooms_api"),
+    path("rules/", views.rules, name="rules"),
 ]

@@ -1,0 +1,180 @@
+# English translations for Mezi Kostkami
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: en\n"
+
+# Navigation
+msgid "Profil"
+msgstr "Profile"
+
+msgid "Odhlásit"
+msgstr "Logout"
+
+msgid "Přihlásit"
+msgstr "Login"
+
+msgid "Registrovat"
+msgstr "Register"
+
+msgid "Žebříček"
+msgstr "Leaderboard"
+
+# Home page
+msgid "Kasino hra štěstí a odvahy"
+msgstr "A casino game of luck and courage"
+
+msgid "Vytvořit místnost"
+msgstr "Create room"
+
+msgid "Název místnosti"
+msgstr "Room name"
+
+msgid "Počáteční peníze každého hráče (Kč)"
+msgstr "Starting money per player (CZK)"
+
+msgid "Základní vklad (Kč)"
+msgstr "Base bet (CZK)"
+
+msgid "Otevřené místnosti"
+msgstr "Open rooms"
+
+msgid "Čeká"
+msgstr "Waiting"
+
+msgid "Hraje"
+msgstr "Playing"
+
+msgid "Připojit"
+msgstr "Join"
+
+msgid "Probíhá"
+msgstr "In progress"
+
+msgid "Žádné otevřené místnosti. Vytvořte novou!"
+msgstr "No open rooms. Create one!"
+
+msgid "Hostitel:"
+msgstr "Host:"
+
+# Lobby
+msgid "Čekárna · čeká se na hráče"
+msgstr "Waiting room · waiting for players"
+
+msgid "Hráči"
+msgstr "Players"
+
+msgid "Zahájit hru"
+msgstr "Start game"
+
+msgid "Čeká se na dalšího hráče…"
+msgstr "Waiting for another player…"
+
+msgid "Připraveni ke hře!"
+msgstr "Ready to play!"
+
+msgid "Čeká se na hostitele, aby zahájil hru…"
+msgstr "Waiting for the host to start the game…"
+
+msgid "Opustit místnost"
+msgstr "Leave room"
+
+msgid "Smazat místnost"
+msgstr "Delete room"
+
+msgid "Opravdu smazat místnost?"
+msgstr "Really delete this room?"
+
+msgid "Nastavení místnosti"
+msgstr "Room settings"
+
+msgid "Počáteční peníze"
+msgstr "Starting money"
+
+msgid "Základní vklad"
+msgstr "Base bet"
+
+msgid "Max. hráčů"
+msgstr "Max. players"
+
+msgid "Odkaz do místnosti"
+msgstr "Room link"
+
+msgid "Hostitel"
+msgstr "Host"
+
+msgid "Pravidla"
+msgstr "Rules"
+
+# Profile
+msgid "Hráčský profil"
+msgstr "Player profile"
+
+msgid "Statistiky"
+msgstr "Statistics"
+
+msgid "Odehráno her"
+msgstr "Games played"
+
+msgid "Výher"
+msgstr "Wins"
+
+msgid "Proher"
+msgstr "Losses"
+
+msgid "Úspěšnost"
+msgstr "Win rate"
+
+msgid "Celkový zisk / ztráta"
+msgstr "Total profit / loss"
+
+msgid "Poslední hry"
+msgstr "Recent games"
+
+msgid "Výhra"
+msgstr "Win"
+
+msgid "Prohra"
+msgstr "Loss"
+
+msgid "Zatím žádné odehrané hry."
+msgstr "No games played yet."
+
+# Leaderboard
+msgid "Nejlepší a nejhorší hráči"
+msgstr "Best and worst players"
+
+msgid "Hráč"
+msgstr "Player"
+
+msgid "Level"
+msgstr "Level"
+
+msgid "Zisk / ztráta"
+msgstr "Profit / loss"
+
+msgid "Odehráno"
+msgstr "Played"
+
+msgid "Zatím žádní hráči."
+msgstr "No players yet."
+
+# Auth
+msgid "Přihlásit se"
+msgstr "Log in"
+
+msgid "Zaregistrovat se"
+msgstr "Sign up"
+
+msgid "Nemáte účet?"
+msgstr "Don't have an account?"
+
+msgid "Zaregistrujte se"
+msgstr "Sign up"
+
+msgid "Máte již účet?"
+msgstr "Already have an account?"
+
+msgid "Přihlaste se"
+msgstr "Log in"

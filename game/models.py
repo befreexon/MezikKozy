@@ -50,6 +50,24 @@ class GameRoomPlayer(models.Model):
         return f"{self.user.username} v {self.room.name} (místo {self.seat_index})"
 
 
+class GameMessage(models.Model):
+    room = models.ForeignKey(GameRoom, on_delete=models.CASCADE, related_name="messages")
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    username = models.CharField(max_length=150)
+    text = models.TextField(max_length=500)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["created_at"]
+
+    def to_dict(self):
+        return {
+            "username": self.username,
+            "text": self.text,
+            "ts": self.created_at.strftime("%H:%M"),
+        }
+
+
 class GameResult(models.Model):
     room = models.ForeignKey(GameRoom, on_delete=models.CASCADE, related_name="results")
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="game_results")

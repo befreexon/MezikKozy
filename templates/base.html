@@ -1,10 +1,11 @@
+{% load i18n static %}
+{% get_current_language as current_lang %}
 <!DOCTYPE html>
-<html lang="cs">
+<html lang="{{ current_lang }}">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}Mezi Kostkami{% endblock %}</title>
-  {% load static %}
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
@@ -15,17 +16,28 @@
 <nav class="navbar">
   <a href="{% url 'game:home' %}" class="nav-brand">Mezi Kostkami</a>
   <div class="nav-links">
+    <a href="{% url 'accounts:leaderboard' %}" class="nav-link">{% trans "Žebříček" %}</a>
     {% if user.is_authenticated %}
-      <span class="nav-user">{{ user.username }}</span>
-      <a href="{% url 'accounts:profile' %}" class="nav-link">Profil</a>
+      <a href="{% url 'accounts:profile' %}" class="nav-link">{% trans "Profil" %}</a>
+    {% endif %}
+    <a href="{% url 'game:rules' %}" class="nav-link">{% trans "Pravidla" %}</a>
+    {% if user.is_authenticated %}
       <form method="post" action="{% url 'accounts:logout' %}" style="display:inline">
         {% csrf_token %}
-        <button type="submit" class="nav-btn">Odhlásit</button>
+        <button type="submit" class="nav-btn">{% trans "Odhlásit" %} <span class="nav-user-inline">({{ user.username }})</span></button>
       </form>
     {% else %}
-      <a href="{% url 'accounts:login' %}" class="nav-link">Přihlásit</a>
-      <a href="{% url 'accounts:register' %}" class="nav-link">Registrovat</a>
+      <a href="{% url 'accounts:login' %}" class="nav-link">{% trans "Přihlásit" %}</a>
+      <a href="{% url 'accounts:register' %}" class="nav-link">{% trans "Registrovat" %}</a>
     {% endif %}
+    <form action="{% url 'set_language' %}" method="post" style="display:inline">
+      {% csrf_token %}
+      <input name="next" type="hidden" value="{{ request.get_full_path }}">
+      <select name="language" class="lang-select" onchange="this.form.submit()">
+        <option value="cs" {% if current_lang == 'cs' %}selected{% endif %}>🇨🇿 CS</option>
+        <option value="en" {% if current_lang == 'en' %}selected{% endif %}>🇬🇧 EN</option>
+      </select>
+    </form>
   </div>
 </nav>
 

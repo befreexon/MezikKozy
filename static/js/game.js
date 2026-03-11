@@ -3,6 +3,9 @@
 
 let ws = null;
 let state = null;
+let levels = {};
+let lastCurrentPlayer = null;
+let countdownInterval = null;
 
 // ── WebSocket ─────────────────────────────────────────────────────────────────
 
@@ -18,10 +21,14 @@ function initWebSocket() {
     const data = JSON.parse(e.data);
     if (data.type === "state_update") {
       state = data.state;
+      levels = data.levels || {};
       renderAll();
     } else if (data.type === "room_update" && data.room.status === "playing") {
-      // Shouldn't happen from game view, but handle gracefully
       window.location.reload();
+    } else if (data.type === "chat_message") {
+      appendChatMessage(data.message);
+    } else if (data.type === "chat_history") {
+      loadChatHistory(data.messages);
     } else if (data.type === "error") {
       console.error("Server error:", data.message);
     }
@@ -54,14 +61,40 @@ function setConnectionStatus(text, cls) {
 function renderAll() {
   if (!state) return;
 
+  if (state.current !== lastCurrentPlayer) {
+    lastCurrentPlayer = state.current;
+    startTurnCountdown(state.turn_started_at);
+  }
+
   renderPlayers();
   renderDice();
   renderControls();
   renderLog();
 
   if (state.phase === "game-over") {
+    if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
     showGameOver();
   }
+}
+
+function startTurnCountdown(turnStartedAt) {
+  if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
+  if (!turnStartedAt) return;
+
+  function tick() {
+    const el = document.getElementById("turn-countdown");
+    if (!el) return;
+    const elapsed = (Date.now() - new Date(turnStartedAt).getTime()) / 1000;
+    const rem = Math.max(0, 300 - elapsed);
+    const m = Math.floor(rem / 60);
+    const s = Math.floor(rem % 60);
+    el.textContent = `⏱ ${m}:${s.toString().padStart(2, "0")}`;
+    el.className = "turn-countdown" + (rem < 60 ? " warning" : "");
+    if (rem === 0) { clearInterval(countdownInterval); countdownInterval = null; }
+  }
+
+  tick();
+  countdownInterval = setInterval(tick, 1000);
 }
 
 // ── Players bar ───────────────────────────────────────────────────────────────
@@ -86,13 +119,19 @@ function renderPlayers() {
   }
 }
 
+function levelBadgeHTML(level) {
+  const cls = level >= 2 ? "level--up" : level <= 0 ? "level--down" : "level--base";
+  return `<span class="level-badge ${cls}">Lv ${level}</span>`;
+}
+
 function playerCardHTML(p) {
   const idx = state.players.indexOf(p);
   const isActive = idx === state.current && !p.eliminated;
+  const lv = levels[p.user_id] !== undefined ? levels[p.user_id] : 1;
   return `
     <div class="player-card ${isActive ? "active" : ""} ${p.eliminated ? "eliminated" : ""}">
       ${isActive ? '<div class="active-indicator"></div>' : ""}
-      <h3>${escapeHtml(p.name)}</h3>
+      <h3>${escapeHtml(p.name)} ${levelBadgeHTML(lv)}</h3>
       <div class="player-money">${p.money} <span>Kč</span></div>
       ${p.eliminated ? '<div style="font-size:0.75rem;color:#e06060;margin-top:4px;">VYŘAZEN</div>' : ""}
     </div>`;
@@ -206,12 +245,14 @@ function renderControls() {
 
 function buildBetUI(p) {
   const baseBet = state.base_bet || 10;
-  const maxBet = p.money;
-  const amounts = [1, 2, 3, 5].map((m) => m * baseBet).filter((b) => b < maxBet);
+  const bank = state.bank;
+  const maxBet = Math.min(p.money, bank);
   const selected = state.selected_bet;
 
+  const presets = [1, 2, 3, 5].map((m) => m * baseBet).filter((b) => b < maxBet);
+
   let html = '<div class="bet-row">';
-  amounts.forEach((b) => {
+  presets.forEach((b) => {
     html += `<button class="bet-btn ${selected === b ? "selected" : ""}" onclick="selectBetAction(${b})">${b} Kč</button>`;
   });
   if (maxBet > 0) {
@@ -220,7 +261,16 @@ function buildBetUI(p) {
   }
   html += "</div>";
 
-  const hasBet = selected !== null && selected !== undefined;
+  html += `
+    <div class="bet-input-row">
+      <input type="number" id="bet-custom-input" class="bet-input"
+        min="1" max="${maxBet}" placeholder="Vlastní částka…"
+        value="${selected !== null && selected !== undefined ? selected : ""}"
+        oninput="selectBetAction(parseInt(this.value) || null)">
+      <span class="bet-input-hint">max ${maxBet} Kč</span>
+    </div>`;
+
+  const hasBet = selected !== null && selected !== undefined && selected > 0;
   html += `
     <div class="btn-group">
       <button class="action-btn primary" ${!hasBet ? "disabled" : ""} onclick="confirmBetAction()">Vsadit a hrát</button>

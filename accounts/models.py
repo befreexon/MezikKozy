@@ -4,6 +4,27 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 
+def compute_level(net_money):
+    """
+    Level based on cumulative net profit/loss.
+      Level  3 : net >= +300
+      Level  2 : net >= +200
+      Level  1 : net >  -200  (base)
+      Level  0 : net >  -300
+      Level -1 : net <= -300
+    """
+    if net_money >= 300:
+        return 3
+    elif net_money >= 200:
+        return 2
+    elif net_money > -200:
+        return 1
+    elif net_money > -300:
+        return 0
+    else:
+        return -1
+
+
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
     games_played = models.IntegerField(default=0)
@@ -30,6 +51,10 @@ class UserProfile(models.Model):
             net=Sum(F("final_money") - F("starting_money"))
         )
         return result["net"] or 0
+
+    @property
+    def level(self):
+        return compute_level(self.net_money)
 
 
 @receiver(post_save, sender=User)

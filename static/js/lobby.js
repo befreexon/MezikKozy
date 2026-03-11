@@ -2,13 +2,22 @@
 /* Expects globals: ROOM_ID, IS_HOST, CURRENT_USER_ID */
 
 let ws = null;
+let reconnectTimeout = null;
+
+function setLobbyStatus(text, ok) {
+  const el = document.getElementById("lobby-connection-status");
+  if (!el) return;
+  el.textContent = text;
+  el.className = "lobby-status " + (ok ? "lobby-status--ok" : "lobby-status--err");
+}
 
 function initWebSocket() {
   const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
   ws = new WebSocket(`${protocol}//${window.location.host}/ws/game/${ROOM_ID}/`);
 
   ws.onopen = function () {
-    console.log("Connected to lobby");
+    setLobbyStatus("Připojeno", true);
+    if (reconnectTimeout) { clearTimeout(reconnectTimeout); reconnectTimeout = null; }
   };
 
   ws.onmessage = function (e) {
@@ -20,15 +29,25 @@ function initWebSocket() {
         window.location.href = `/room/${ROOM_ID}/play/`;
       }
     } else if (data.type === "state_update") {
-      // Game already started – redirect immediately
       window.location.href = `/room/${ROOM_ID}/play/`;
+    } else if (data.type === "room_deleted") {
+      window.location.href = "/";
+    } else if (data.type === "chat_message") {
+      appendChatMessage(data.message);
+    } else if (data.type === "chat_history") {
+      loadChatHistory(data.messages);
     } else if (data.type === "error") {
       console.error("Server error:", data.message);
     }
   };
 
   ws.onclose = function () {
-    console.log("Disconnected from lobby");
+    setLobbyStatus("Odpojeno – znovu se připojuji…", false);
+    reconnectTimeout = setTimeout(initWebSocket, 3000);
+  };
+
+  ws.onerror = function () {
+    setLobbyStatus("Chyba připojení", false);
   };
 }
 
@@ -40,6 +59,11 @@ function updateRoom(room) {
   }
 }
 
+function levelBadgeHTML(level) {
+  const cls = level >= 2 ? "level--up" : level <= 0 ? "level--down" : "level--base";
+  return `<span class="level-badge ${cls}">Lv ${level}</span>`;
+}
+
 function updatePlayerList(players) {
   const listEl = document.getElementById("player-list");
   if (!listEl) return;
@@ -48,7 +72,7 @@ function updatePlayerList(players) {
     .map(
       (p) => `
         <div class="lobby-player">
-          <span class="lobby-player-name">${escapeHtml(p.username)}</span>
+          <span class="lobby-player-name">${escapeHtml(p.username)} ${levelBadgeHTML(p.level !== undefined ? p.level : 1)}</span>
           ${p.id === ROOM_HOST_ID ? '<span class="host-badge">Hostitel</span>' : ""}
         </div>`
     )
@@ -74,6 +98,8 @@ function updateStartButton(count) {
 function startGame() {
   if (ws && ws.readyState === WebSocket.OPEN) {
     ws.send(JSON.stringify({ action: "start_game" }));
+  } else {
+    setLobbyStatus("Nejste připojeni – počkejte na reconnect…", false);
   }
 }
 

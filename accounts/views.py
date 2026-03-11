@@ -41,6 +41,43 @@ def profile(request):
     )
 
 
+def leaderboard(request):
+    from game.models import GameResult
+    from django.db.models import Sum, F
+    from .models import UserProfile, compute_level
+
+    # Compute net money per user in one query
+    net_by_user = {
+        r["user_id"]: r["net"]
+        for r in GameResult.objects.values("user_id").annotate(
+            net=Sum(F("final_money") - F("starting_money"))
+        )
+    }
+
+    profiles = (
+        UserProfile.objects.select_related("user")
+        .order_by("user__username")
+    )
+
+    players = sorted(
+        [
+            {
+                "user_id": p.user_id,
+                "username": p.user.username,
+                "games_played": p.games_played,
+                "games_won": p.games_won,
+                "net_money": net_by_user.get(p.user_id, 0),
+                "level": compute_level(net_by_user.get(p.user_id, 0)),
+            }
+            for p in profiles
+        ],
+        key=lambda x: (x["level"], x["net_money"]),
+        reverse=True,
+    )
+
+    return render(request, "accounts/leaderboard.html", {"players": players})
+
+
 def public_profile(request, user_id):
     from game.models import GameResult
 

@@ -3,6 +3,11 @@ Pure Python game logic for Mezi Kostkami.
 No Django dependencies — easy to test in isolation.
 """
 import random
+from datetime import datetime, timezone
+
+
+def _now_iso():
+    return datetime.now(timezone.utc).isoformat()
 
 
 def roll_dice(n=1):
@@ -36,6 +41,7 @@ def create_game_state(players, starting_money=100, base_bet=10):
         "bonus_roll": None,
         "winner_id": None,
         "base_bet": base_bet,
+        "turn_started_at": _now_iso(),
         "log": [],
     }
     _collect_ante(state, "Počáteční vklad do banku")
@@ -149,16 +155,17 @@ def _do_first_roll(state):
 
 def _select_bet(state, amount):
     current_player = state["players"][state["current"]]
+    bank = state["bank"]
 
     if amount == "all-in":
-        amount = current_player["money"]
+        amount = min(current_player["money"], bank)
     else:
         try:
             amount = int(amount)
         except (ValueError, TypeError):
             return False
 
-    if amount <= 0 or amount > current_player["money"]:
+    if amount <= 0 or amount > current_player["money"] or amount > bank:
         return False
 
     state["selected_bet"] = amount
@@ -242,6 +249,7 @@ def _next_player_internal(state):
     state["selected_bet"] = None
     state["last_result"] = None
     state["bonus_roll"] = None
+    state["turn_started_at"] = _now_iso()
 
     if state["bank"] == 0:
         _collect_ante(state)

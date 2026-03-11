@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static i18n %}
 
 {% block title %}{{ room.name }} – Lobby{% endblock %}
 
@@ -11,14 +11,15 @@
 <div class="container">
   <header class="page-header">
     <h1>{{ room.name }}</h1>
-    <p>Čekárna · čeká se na hráče</p>
+    <p>{% trans "Čekárna · čeká se na hráče" %}</p>
+    <div id="lobby-connection-status" class="lobby-status">Připojování…</div>
   </header>
 
   <div class="lobby-layout">
 
     <section class="card lobby-card">
       <div class="lobby-header">
-        <h2 class="card-title">Hráči</h2>
+        <h2 class="card-title">{% trans "Hráči" %}</h2>
         <span class="player-count" id="player-count">{{ players.count }}/{{ room.max_players }}</span>
       </div>
 
@@ -36,47 +37,56 @@
       <div class="lobby-actions">
         {% if is_host %}
           <button id="start-btn" class="action-btn primary" {% if players.count < 2 %}disabled{% endif %}>
-            Zahájit hru
+            {% trans "Zahájit hru" %}
           </button>
           <p class="skip-info" id="start-hint">
-            {% if players.count < 2 %}Čeká se na dalšího hráče…{% else %}Připraveni ke hře!{% endif %}
+            {% if players.count < 2 %}{% trans "Čeká se na dalšího hráče…" %}{% else %}{% trans "Připraveni ke hře!" %}{% endif %}
           </p>
         {% else %}
-          <p class="waiting-text">Čeká se na hostitele, aby zahájil hru…</p>
+          <p class="waiting-text">{% trans "Čeká se na hostitele, aby zahájil hru…" %}</p>
         {% endif %}
 
         <a href="{% url 'game:home' %}" class="action-btn secondary" style="text-decoration:none;text-align:center;margin-top:10px;">
-          Opustit místnost
+          {% trans "Opustit místnost" %}
         </a>
 
         {% if is_host %}
           <form method="post" action="{% url 'game:delete_room' room.id %}" style="margin-top:8px;"
-                onsubmit="return confirm('Opravdu smazat místnost?');">
+                onsubmit="return confirm('{% trans "Opravdu smazat místnost?" %}');">
             {% csrf_token %}
-            <button type="submit" class="action-btn danger" style="width:100%;">Smazat místnost</button>
+            <button type="submit" class="action-btn danger" style="width:100%;">{% trans "Smazat místnost" %}</button>
           </form>
         {% endif %}
       </div>
     </section>
 
+    <section class="card chat-card">
+      <h2 class="card-title">💬 Chat</h2>
+      <div id="chat-messages" class="chat-messages"></div>
+      <div class="chat-input-row">
+        <input type="text" id="chat-input" class="chat-input" placeholder="Napište zprávu…" maxlength="500" autocomplete="off">
+        <button id="chat-send" class="action-btn primary chat-send-btn">➤</button>
+      </div>
+    </section>
+
     <section class="card">
-      <h2 class="card-title">Nastavení místnosti</h2>
+      <h2 class="card-title">{% trans "Nastavení místnosti" %}</h2>
       <div class="room-settings">
         <div class="setting-row">
-          <span class="setting-label">Počáteční peníze</span>
+          <span class="setting-label">{% trans "Počáteční peníze" %}</span>
           <span class="setting-value">{{ room.starting_money }} Kč</span>
         </div>
         <div class="setting-row">
-          <span class="setting-label">Základní vklad</span>
+          <span class="setting-label">{% trans "Základní vklad" %}</span>
           <span class="setting-value">{{ room.base_bet }} Kč</span>
         </div>
         <div class="setting-row">
-          <span class="setting-label">Max. hráčů</span>
+          <span class="setting-label">{% trans "Max. hráčů" %}</span>
           <span class="setting-value">{{ room.max_players }}</span>
         </div>
       </div>
 
-      <h2 class="card-title" style="margin-top:1.5rem;">Odkaz do místnosti</h2>
+      <h2 class="card-title" style="margin-top:1.5rem;">{% trans "Odkaz do místnosti" %}</h2>
       <p style="word-break:break-all;color:var(--cream2);font-size:0.95rem;">
         {{ request.build_absolute_uri }}
       </p>
@@ -92,4 +102,5 @@
   const ROOM_HOST_ID = {{ room.host_id }};
 </script>
 <script src="{% static 'js/lobby.js' %}"></script>
+<script src="{% static 'js/chat.js' %}"></script>
 {% endblock %}
