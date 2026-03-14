@@ -38,7 +38,7 @@
       </div>
       <div style="text-align:center;margin-top:12px;">
         <span class="level-badge {% if profile.level == 3 %}level--gold{% elif profile.level == 2 %}level--silver{% elif profile.level == 1 %}level--bronze{% else %}level--potato{% endif %}" style="font-size:1.1rem;padding:3px 10px;">
-          {% if profile.level == 3 %}🥇 Zlatá{% elif profile.level == 2 %}🥈 Stříbrná{% elif profile.level == 1 %}🥉 Bronzová{% else %}🥔 Bramborová{% endif %}
+          {% if profile.level == 3 %}🥇 {% trans "Zlatá" %}{% elif profile.level == 2 %}🥈 {% trans "Stříbrná" %}{% elif profile.level == 1 %}🥉 {% trans "Bronzová" %}{% else %}🥔 {% trans "Bramborová" %}{% endif %}
         </span>
       </div>
 

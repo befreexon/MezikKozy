@@ -46,6 +46,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "config.context_processors.app_version",
             ],
         },
     },
@@ -80,6 +81,11 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
+
+# Semantic version derived from git history (8 commits → v1.3.0)
+# v1.0.0 = django app, v1.1.0 = variable bets, v1.2.0 = leaderboard/translations
+# v1.3.0 = chat, levels rework, bug fixes (current)
+APP_VERSION = "1.3.0"
 
 LANGUAGE_CODE = "cs"
 LANGUAGES = [

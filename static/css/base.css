@@ -763,3 +763,25 @@ body::before {
 .chat-messages::-webkit-scrollbar { width: 4px; }
 .chat-messages::-webkit-scrollbar-track { background: transparent; }
 .chat-messages::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.25); border-radius: 2px; }
+
+/* ── Site footer ───────────────────────────────────────────────────────────── */
+.site-footer {
+  position: fixed;
+  bottom: 8px;
+  right: 14px;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.site-footer-version {
+  pointer-events: all;
+  font-size: 0.7rem;
+  font-family: 'Crimson Text', serif;
+  color: rgba(240, 230, 200, 0.22);
+  letter-spacing: 0.06em;
+}
+
+.site-footer-version:hover {
+  color: rgba(240, 230, 200, 0.55);
+  transition: color 0.2s;
+}

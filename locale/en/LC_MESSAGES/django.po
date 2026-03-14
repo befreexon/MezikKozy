@@ -196,3 +196,15 @@ msgstr "Create account"
 
 msgid "Již máte účet?"
 msgstr "Already have an account?"
+
+msgid "Zlatá"
+msgstr "Gold"
+
+msgid "Stříbrná"
+msgstr "Silver"
+
+msgid "Bronzová"
+msgstr "Bronze"
+
+msgid "Bramborová"
+msgstr "Potato"
