@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}Registrovat se – Mezi Kostkami{% endblock %}
+{% block title %}{% trans "Registrovat se" %} – Mezi Kostkami{% endblock %}
 
 {% block extra_css %}
   <link rel="stylesheet" href="{% static 'css/accounts.css' %}">
@@ -10,7 +10,7 @@
 {% block content %}
 <div class="auth-container">
   <div class="auth-card">
-    <h2>Registrovat se</h2>
+    <h2>{% trans "Registrovat se" %}</h2>
 
     <form method="post" novalidate>
       {% csrf_token %}
@@ -27,10 +27,10 @@
           {% endif %}
         </div>
       {% endfor %}
-      <button type="submit" class="action-btn primary">Vytvořit účet</button>
+      <button type="submit" class="action-btn primary">{% trans "Vytvořit účet" %}</button>
     </form>
 
-    <p class="auth-link">Již máte účet? <a href="{% url 'accounts:login' %}">Přihlásit se</a></p>
+    <p class="auth-link">{% trans "Již máte účet?" %} <a href="{% url 'accounts:login' %}">{% trans "Přihlásit se" %}</a></p>
   </div>
 </div>
 {% endblock %}

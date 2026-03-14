@@ -7,22 +7,19 @@ from django.dispatch import receiver
 def compute_level(net_money):
     """
     Level based on cumulative net profit/loss.
-      Level  3 : net >= +300
-      Level  2 : net >= +200
-      Level  1 : net >  -200  (base)
-      Level  0 : net >  -300
-      Level -1 : net <= -300
+      Level 3 (zlatá)    : net > +400
+      Level 2 (stříbrná) : +200 <= net <= +400
+      Level 1 (bronzová) : 0 <= net < +200
+      Level 0 (bramborová): net < 0
     """
-    if net_money >= 300:
+    if net_money > 400:
         return 3
     elif net_money >= 200:
         return 2
-    elif net_money > -200:
+    elif net_money >= 0:
         return 1
-    elif net_money > -300:
-        return 0
     else:
-        return -1
+        return 0
 
 
 class UserProfile(models.Model):

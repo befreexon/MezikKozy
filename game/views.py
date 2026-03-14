@@ -8,13 +8,20 @@ from .models import GameRoom, GameRoomPlayer
 
 
 def _cleanup_stale_rooms():
-    """Smaže waiting místnosti bez aktivních hráčů starší 5 minut."""
-    cutoff = timezone.now() - timedelta(minutes=5)
+    """Smaže stale místnosti: waiting bez aktivních hráčů >5 min, playing/finished >12 h."""
+    cutoff_waiting = timezone.now() - timedelta(minutes=5)
+    cutoff_old = timezone.now() - timedelta(hours=12)
+
     active_players = GameRoomPlayer.objects.filter(room=OuterRef("pk"), active=True)
     GameRoom.objects.filter(
         status=GameRoom.STATUS_WAITING,
-        last_activity__lt=cutoff,
+        last_activity__lt=cutoff_waiting,
     ).exclude(Exists(active_players)).delete()
+
+    GameRoom.objects.filter(
+        status__in=[GameRoom.STATUS_PLAYING, GameRoom.STATUS_FINISHED],
+        created_at__lt=cutoff_old,
+    ).delete()
 
 
 @login_required
@@ -65,6 +72,16 @@ def delete_room(request, room_id):
         )
         room.delete()
     return redirect("game:home")
+
+
+@login_required
+def room_status_api(request, room_id):
+    from django.http import JsonResponse
+    try:
+        room = GameRoom.objects.get(id=room_id)
+        return JsonResponse({"status": room.status})
+    except GameRoom.DoesNotExist:
+        return JsonResponse({"status": "deleted"})
 
 
 @login_required

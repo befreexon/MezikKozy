@@ -1,10 +1,13 @@
 import json
 import asyncio
+import logging
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 from django.db import models as django_models
 
 from .game_logic import create_game_state, process_action
+
+logger = logging.getLogger(__name__)
 
 TURN_TIMEOUT = 5 * 60  # seconds
 
@@ -148,8 +151,13 @@ class GameConsumer(AsyncWebsocketConsumer):
         consumer_ref = self
 
         async def _timeout():
-            await asyncio.sleep(TURN_TIMEOUT)
-            await consumer_ref._apply_turn_timeout(room_id, expected_player_idx)
+            try:
+                await asyncio.sleep(TURN_TIMEOUT)
+                await consumer_ref._apply_turn_timeout(room_id, expected_player_idx)
+            except asyncio.CancelledError:
+                pass
+            except Exception:
+                logger.exception("Chyba v turn timeout pro místnost %s", room_id)
 
         _turn_timers[room_id] = asyncio.create_task(_timeout())
 
@@ -188,17 +196,26 @@ class GameConsumer(AsyncWebsocketConsumer):
     # ── Channel layer message handlers ────────────────────────────────────────
 
     async def game_state_broadcast(self, event):
-        await self.send(text_data=json.dumps({
-            "type": "state_update",
-            "state": event["state"],
-            "levels": event.get("levels", {}),
-        }))
+        try:
+            await self.send(text_data=json.dumps({
+                "type": "state_update",
+                "state": event["state"],
+                "levels": event.get("levels", {}),
+            }))
+        except Exception:
+            pass
 
     async def room_update_broadcast(self, event):
-        await self.send(text_data=json.dumps({"type": "room_update", "room": event["room"]}))
+        try:
+            await self.send(text_data=json.dumps({"type": "room_update", "room": event["room"]}))
+        except Exception:
+            pass
 
     async def room_deleted_broadcast(self, event):
-        await self.send(text_data=json.dumps({"type": "room_deleted"}))
+        try:
+            await self.send(text_data=json.dumps({"type": "room_deleted"}))
+        except Exception:
+            pass
 
     # ── Helpers ───────────────────────────────────────────────────────────────
 

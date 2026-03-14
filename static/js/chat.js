@@ -12,6 +12,9 @@ function initChat() {
     if (ws && ws.readyState === WebSocket.OPEN) {
       ws.send(JSON.stringify({ action: "send_chat", text }));
       input.value = "";
+    } else {
+      input.placeholder = "Připojování… zkuste za chvíli";
+      setTimeout(() => { input.placeholder = "Napište zprávu…"; }, 2000);
     }
   }
 

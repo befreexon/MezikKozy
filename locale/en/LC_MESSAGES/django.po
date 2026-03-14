@@ -178,3 +178,21 @@ msgstr "Already have an account?"
 
 msgid "Přihlaste se"
 msgstr "Log in"
+
+msgid "Nesprávné jméno nebo heslo."
+msgstr "Incorrect username or password."
+
+msgid "Uživatelské jméno"
+msgstr "Username"
+
+msgid "Heslo"
+msgstr "Password"
+
+msgid "Registrovat se"
+msgstr "Sign up"
+
+msgid "Vytvořit účet"
+msgstr "Create account"
+
+msgid "Již máte účet?"
+msgstr "Already have an account?"

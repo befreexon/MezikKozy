@@ -536,6 +536,11 @@ body::before {
   margin-left: 4px;
 }
 
+.level--gold   { background: rgba(201, 168, 76, 0.2); color: var(--gold); border: 1px solid rgba(201, 168, 76, 0.4); }
+.level--silver { background: rgba(180, 180, 210, 0.15); color: #b0b8d8; border: 1px solid rgba(180,180,210,0.35); }
+.level--bronze { background: rgba(180, 110, 50, 0.15); color: #cd8a4a; border: 1px solid rgba(180,110,50,0.35); }
+.level--potato { background: rgba(90, 70, 35, 0.2); color: #9a7a50; border: 1px solid rgba(90,70,35,0.35); }
+/* keep old aliases for any cached code */
 .level--up   { background: rgba(201, 168, 76, 0.2); color: var(--gold); border: 1px solid rgba(201, 168, 76, 0.4); }
 .level--base { background: rgba(255, 255, 255, 0.08); color: var(--cream2); border: 1px solid rgba(255,255,255,0.15); }
 .level--down { background: rgba(204, 34, 34, 0.15); color: #e06060; border: 1px solid rgba(204,34,34,0.3); }
@@ -572,6 +577,11 @@ body::before {
 .lb-row:last-child { border-bottom: none; }
 .lb-row:hover { background: rgba(255,255,255,0.04); }
 
+.lb-row--gold   { border-left: 3px solid rgba(201,168,76,0.6); }
+.lb-row--silver { border-left: 3px solid rgba(180,180,210,0.5); }
+.lb-row--bronze { border-left: 3px solid rgba(180,110,50,0.5); }
+.lb-row--potato { border-left: 3px solid rgba(90,70,35,0.4); }
+/* keep old aliases */
 .lb-row--up   { border-left: 3px solid rgba(201,168,76,0.5); }
 .lb-row--down { border-left: 3px solid rgba(204,34,34,0.4); }
 .lb-row--base { border-left: 3px solid transparent; }

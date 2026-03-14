@@ -437,4 +437,33 @@ header h1 {
   .log-chat-row {
     grid-template-columns: 1fr;
   }
+
+  /* Force players-bar to wrap nicely on mobile */
+  .players-bar {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px;
+  }
+
+  /* Bank display spans full width on mobile */
+  .players-bar .bank-display {
+    grid-column: 1 / -1;
+    padding: 10px;
+    background: rgba(201, 168, 76, 0.06);
+    border: 1px solid rgba(201, 168, 76, 0.2);
+    border-radius: 8px;
+  }
+
+  .player-card {
+    padding: 10px 12px;
+  }
+
+  .player-money {
+    font-size: 1.3rem;
+  }
+
+  .die {
+    width: 54px;
+    height: 54px;
+    font-size: 1.6rem;
+  }
 }

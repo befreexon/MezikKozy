@@ -26,10 +26,10 @@
           <span>{% trans "Výher" %}</span>
         </div>
         {% for p in players %}
-          <a href="{% url 'accounts:public_profile' p.user_id %}" class="lb-row lb-row--{% if p.level >= 2 %}up{% elif p.level <= 0 %}down{% else %}base{% endif %}">
+          <a href="{% url 'accounts:public_profile' p.user_id %}" class="lb-row lb-row--{% if p.level == 3 %}gold{% elif p.level == 2 %}silver{% elif p.level == 1 %}bronze{% else %}potato{% endif %}">
             <span class="lb-rank">{{ forloop.counter }}</span>
             <span class="lb-name">{{ p.username }}</span>
-            <span><span class="level-badge {% if p.level >= 2 %}level--up{% elif p.level <= 0 %}level--down{% else %}level--base{% endif %}">Lv {{ p.level }}</span></span>
+            <span><span class="level-badge {% if p.level == 3 %}level--gold{% elif p.level == 2 %}level--silver{% elif p.level == 1 %}level--bronze{% else %}level--potato{% endif %}">{% if p.level == 3 %}🥇{% elif p.level == 2 %}🥈{% elif p.level == 1 %}🥉{% else %}🥔{% endif %}</span></span>
             <span class="lb-net {% if p.net_money >= 0 %}lb-net--pos{% else %}lb-net--neg{% endif %}">
               {% if p.net_money >= 0 %}+{% endif %}{{ p.net_money }} Kč
             </span>

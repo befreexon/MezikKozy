@@ -24,10 +24,11 @@ function initWebSocket() {
     const data = JSON.parse(e.data);
 
     if (data.type === "room_update") {
-      updateRoom(data.room);
       if (data.room.status === "playing") {
         window.location.href = `/room/${ROOM_ID}/play/`;
+        return;
       }
+      updateRoom(data.room);
     } else if (data.type === "state_update") {
       window.location.href = `/room/${ROOM_ID}/play/`;
     } else if (data.type === "room_deleted") {
@@ -60,8 +61,14 @@ function updateRoom(room) {
 }
 
 function levelBadgeHTML(level) {
-  const cls = level >= 2 ? "level--up" : level <= 0 ? "level--down" : "level--base";
-  return `<span class="level-badge ${cls}">Lv ${level}</span>`;
+  const tiers = {
+    3: { cls: "level--gold",   icon: "🥇" },
+    2: { cls: "level--silver", icon: "🥈" },
+    1: { cls: "level--bronze", icon: "🥉" },
+    0: { cls: "level--potato", icon: "🥔" },
+  };
+  const t = tiers[level] || tiers[1];
+  return `<span class="level-badge ${t.cls}">${t.icon}</span>`;
 }
 
 function updatePlayerList(players) {
@@ -110,11 +117,36 @@ function escapeHtml(str) {
     .replace(/>/g, "&gt;");
 }
 
+// Fallback: poll room status every 4s so redirect works even if WS message is missed
+let _statusPollInterval = null;
+function startStatusPoll() {
+  if (_statusPollInterval) return;
+  _statusPollInterval = setInterval(function () {
+    fetch(`/game/api/rooms/${ROOM_ID}/status/`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.status === "playing") {
+          window.location.href = `/room/${ROOM_ID}/play/`;
+        }
+      })
+      .catch(() => {});
+  }, 4000);
+}
+
 document.addEventListener("DOMContentLoaded", function () {
   initWebSocket();
+  startStatusPoll();
 
   const startBtn = document.getElementById("start-btn");
   if (startBtn) {
     startBtn.addEventListener("click", startGame);
+  }
+});
+
+// Reinitialize when restored from browser back-forward cache
+window.addEventListener("pageshow", function (e) {
+  if (e.persisted) {
+    if (ws) { try { ws.close(); } catch (_) {} ws = null; }
+    initWebSocket();
   }
 });

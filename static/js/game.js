@@ -120,8 +120,14 @@ function renderPlayers() {
 }
 
 function levelBadgeHTML(level) {
-  const cls = level >= 2 ? "level--up" : level <= 0 ? "level--down" : "level--base";
-  return `<span class="level-badge ${cls}">Lv ${level}</span>`;
+  const tiers = {
+    3: { cls: "level--gold",   icon: "🥇" },
+    2: { cls: "level--silver", icon: "🥈" },
+    1: { cls: "level--bronze", icon: "🥉" },
+    0: { cls: "level--potato", icon: "🥔" },
+  };
+  const t = tiers[level] || tiers[1];
+  return `<span class="level-badge ${t.cls}">${t.icon}</span>`;
 }
 
 function playerCardHTML(p) {
@@ -327,3 +333,12 @@ function escapeHtml(str) {
 // ── Boot ──────────────────────────────────────────────────────────────────────
 
 document.addEventListener("DOMContentLoaded", initWebSocket);
+
+// Reinitialize when restored from browser back-forward cache
+window.addEventListener("pageshow", function (e) {
+  if (e.persisted) {
+    if (ws) { try { ws.close(); } catch (_) {} ws = null; }
+    state = null;
+    initWebSocket();
+  }
+});
